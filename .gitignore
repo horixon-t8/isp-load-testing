@@ -1,0 +1,47 @@
+# K6 Test Results and Reports
+summary.json
+reports/*.html
+reports/*.csv
+reports/*.json
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment and Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+.vscode/
+.idea/
+
+# Log files
+*.log
+logs/
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+
+# K6 specific
+k6-*.log
+
+# Backup files
+*.bak
+*.backup
+
+# Test data that shouldn't be committed
+test-data/sensitive/
+credentials.json
+
+# ESLint cache
+.eslintcache

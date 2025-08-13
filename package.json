@@ -1,0 +1,46 @@
+{
+  "name": "isp-load-testing",
+  "version": "1.0.0",
+  "description": "K6 load testing suite for ISP API endpoints",
+  "main": "main.js",
+  "scripts": {
+    "test": "k6 run main.js",
+    "test:homepage": "k6 run main.js --env SCENE=homepage",
+    "test:quotation": "k6 run main.js --env SCENE=quotation",
+    "test:user": "k6 run main.js --env SCENE=user-management",
+    "test:light": "k6 run main.js --env TEST_TYPE=light",
+    "test:heavy": "k6 run main.js --env TEST_TYPE=heavy",
+    "test:spike": "k6 run main.js --env TEST_TYPE=spike",
+    "test:staging": "k6 run main.js --env ENV=staging",
+    "test:production": "k6 run main.js --env ENV=production",
+    "test:all": "k6 run main.js --env RUN_ALL=true",
+    "test:export": "k6 run main.js --env EXPORT_HTML=true --env EXPORT_CSV=true",
+    "test:custom": "k6 run main.js --env SCENE=homepage --env USERS=100 --env DURATION=5m",
+    "clean": "rm -rf reports/*.html reports/*.csv summary.json",
+    "setup": "mkdir -p reports",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "fmt": "prettier --write .",
+    "fmt:check": "prettier --check .",
+    "quality": "npm run lint && npm run fmt:check"
+  },
+  "keywords": [
+    "k6",
+    "load-testing",
+    "performance",
+    "api-testing",
+    "isp"
+  ],
+  "author": "ISP QA Team",
+  "private": true,
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.2.5"
+  },
+  "dependencies": {},
+  "engines": {
+    "k6": ">=0.45.0"
+  }
+}

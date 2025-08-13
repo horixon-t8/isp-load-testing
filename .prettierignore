@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Generated files
+reports/
+summary.json
+
+# Config files that should maintain their format
+package-lock.json
+yarn.lock
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
