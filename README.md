@@ -104,10 +104,13 @@ k6 run main.js --env EXPORT_HTML=true --env EXPORT_CSV=true
 
 ```bash
 # Quick test commands
-npm run test                  # Default test
-npm run test:homepage         # Homepage tests
-npm run test:quotation        # Quotation tests
-npm run test:user             # User management tests
+npm run test                    # Default test
+npm run test:homepage           # Homepage tests
+npm run test:quotation:list     # Quotation list flow only
+npm run test:quotation:detail   # Quotation detail flow only
+npm run test:quotation:create   # Quotation create flow only
+npm run test:quotation:complete # Quotation complete flow (create→submit→PDF)
+npm run test:user               # User management tests
 
 # Load test types
 npm run test:light            # Light load

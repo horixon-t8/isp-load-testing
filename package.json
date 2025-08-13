@@ -6,8 +6,10 @@
   "scripts": {
     "test": "k6 run main.js",
     "test:homepage": "k6 run main.js --env SCENE=homepage",
-    "test:quotation": "k6 run main.js --env SCENE=quotation",
-    "test:user": "k6 run main.js --env SCENE=user-management",
+    "test:quotation:list": "k6 run main.js --env SCENE=quotation --env QUOTATION_FLOW=list",
+    "test:quotation:detail": "k6 run main.js --env SCENE=quotation --env QUOTATION_FLOW=detail",
+    "test:quotation:create": "k6 run main.js --env SCENE=quotation --env QUOTATION_FLOW=create",
+    "test:quotation:complete": "k6 run main.js --env SCENE=quotation --env QUOTATION_FLOW=complete",
     "test:light": "k6 run main.js --env TEST_TYPE=light",
     "test:heavy": "k6 run main.js --env TEST_TYPE=heavy",
     "test:spike": "k6 run main.js --env TEST_TYPE=spike",

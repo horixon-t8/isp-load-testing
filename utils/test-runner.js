@@ -1,5 +1,10 @@
 import { runHomepageFlow } from '../scenes/homepage/homepage-flow.js';
-import { runQuotationFlow } from '../scenes/quotation/quotation-flow.js';
+import {
+  runQuotationListFlow,
+  runQuotationDetailFlow,
+  runQuotationCreateFlow,
+  runQuotationCompleteFlow
+} from '../scenes/quotation/quotation-flow.js';
 import { testAuthMe } from '../scenes/homepage/auth-me.js';
 import { testAuthFeatures } from '../scenes/homepage/auth-features.js';
 import { testMasterCategories } from '../scenes/homepage/master-categories.js';
@@ -60,8 +65,22 @@ export class TestRunner {
   runQuotationTests() {
     if (__ENV.RUN_ALL === 'true') {
       return this.runAllQuotationTests();
-    } else {
-      return runQuotationFlow(this.config.baseUrl, this.headers);
+    }
+
+    const quotationFlow = __ENV.QUOTATION_FLOW?.toLowerCase();
+
+    switch (quotationFlow) {
+      case 'list':
+        return runQuotationListFlow(this.config.baseUrl, this.headers);
+      case 'detail':
+        return runQuotationDetailFlow(this.config.baseUrl, this.headers);
+      case 'create':
+        return runQuotationCreateFlow(this.config.baseUrl, this.headers);
+      case 'complete':
+        return runQuotationCompleteFlow(this.config.baseUrl, this.headers);
+      default:
+        console.warn(`Unknown quotation flow: ${quotationFlow}, running complete flow`);
+        return runQuotationCompleteFlow(this.config.baseUrl, this.headers);
     }
   }
 

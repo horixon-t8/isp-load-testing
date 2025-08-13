@@ -7,6 +7,8 @@ const createQuotationResponseTime = new Trend('create_quotation_response_time');
 const createQuotationRequests = new Counter('create_quotation_requests');
 
 export function testCreateQuotation(baseUrl, headers, quotationData = null) {
+  // TODO: Replace with actual quotation data or use a default template
+  // This is a placeholder for the quotation data structure.
   const defaultQuotationData = {
     title: `Test Quotation ${Date.now()}`,
     description: 'Load test quotation',
@@ -26,7 +28,7 @@ export function testCreateQuotation(baseUrl, headers, quotationData = null) {
 
   const payload = JSON.stringify(quotationData || defaultQuotationData);
 
-  const response = http.post(`${baseUrl}/quotations`, payload, {
+  const response = http.post(`${baseUrl}/quotation/save`, payload, {
     headers: {
       ...headers,
       'Content-Type': 'application/json'

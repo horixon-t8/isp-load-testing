@@ -89,11 +89,8 @@ export class ReportGenerator {
       'master_categories_errors',
       'list_quotations_errors',
       'create_quotation_errors',
-      'login_errors',
-      'profile_errors',
       'homepage_flow_errors',
-      'quotation_flow_errors',
-      'user_flow_errors'
+      'quotation_flow_errors'
     ];
 
     customMetrics.forEach(metricName => {
