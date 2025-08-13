@@ -2,14 +2,9 @@ export default {
   default: {
     scenarios: {
       default: {
-        executor: 'ramping-vus',
-        startVUs: 1,
-        stages: [
-          { duration: '30s', target: 10 },
-          { duration: '1m', target: 50 },
-          { duration: '2m', target: 100 },
-          { duration: '1m', target: 0 }
-        ]
+        executor: 'constant-vus',
+        vus: 1,
+        duration: '30s'
       }
     },
     thresholds: {

@@ -7,31 +7,29 @@ A comprehensive K6 load testing suite for ISP API endpoints with modular scene-b
 ```
 k6-test-suite/
 ├── config/
-│   ├── environments.js            # Environment configurations
-│   └── test-settings.js           # Test execution settings
+│   ├── environments.js              # Environment configurations
+│   └── test-settings.js             # Test execution settings
 ├── scenes/
-│   ├── homepage/                  # Homepage related tests
-│   │   ├── auth-me.js             # Test: GET /auth/me
-│   │   ├── auth-features.js       # Test: GET /auth/features
-│   │   ├── master-categories.js   # Test: GET /master/categories
-│   │   └── homepage-flow.js       # Combined homepage flow
-│   ├── quotation/                 # Quotation related tests
-│   │   ├── list-quotations.js     # Test: GET /quotations/my-list
-│   │   ├── create-quotation.js    # Test: POST /quotations
-│   │   └── quotation-flow.js      # Complete quotation workflow
-│   └── user-management/           # User management tests
-│       ├── login.js               # Test: POST /auth/login
-│       ├── profile.js             # Test: GET /user/profile
-│       └── user-flow.js           # User management workflow
+│   ├── homepage/                    # Homepage related tests
+│   │   ├── auth-me.js               # Test: GET /auth/me
+│   │   ├── auth-features.js         # Test: GET /auth/features
+│   │   ├── master-categories.js     # Test: GET /master/categories
+│   │   └── homepage-flow.js         # Combined homepage flow
+│   └── quotation/                   # Quotation related tests
+│       ├── list-quotations.js       # Test: POST /quotation/requests/list
+│       ├── get-quotation-detail.js  # Test: GET /quotation/detail/{uuid}
+│       ├── create-quotation.js      # Test: POST /quotation/save
+│       ├── submit-quotation.js      # Test: POST /quotation/submit-request
+│       └── quotation-flow.js        # Complete quotation workflow
 ├── utils/
-│   ├── config-loader.js           # Configuration management
-│   ├── test-runner.js             # Dynamic test execution
-│   ├── report-generator.js        # HTML/CSV report generation
-│   └── helpers.js                 # Common test utilities
-├── reports/                       # Generated reports directory
-├── main.js                        # Main test runner entry point
-├── package.json                   # Project dependencies
-└── README.md                      # This file
+│   ├── config-loader.js             # Configuration management
+│   ├── test-runner.js               # Dynamic test execution
+│   ├── report-generator.js          # HTML/CSV report generation
+│   └── helpers.js                   # Common test utilities
+├── reports/                         # Generated reports directory
+├── main.js                          # Main test runner entry point
+├── package.json                     # Project dependencies
+└── README.md                        # This file
 ```
 
 ## 🚀 Quick Start
