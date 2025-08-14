@@ -117,60 +117,67 @@ export class ReportGenerator {
 
   static generateGrafanaCSV(data) {
     const timestamp = new Date().toISOString();
-    const rows = [];
-    
-    // Grafana-compatible timeseries format
-    rows.push(['timestamp', 'metric_name', 'value', 'unit', 'scene', 'test_file', 'environment']);
-
     const scene = __ENV.SCENE || 'unknown';
     const testFile = __ENV.TEST_FILE || 'unknown';
     const environment = __ENV.ENVIRONMENT || 'unknown';
 
+    // Wide format - metrics as columns (Grafana time series friendly)
+    const metrics = {
+      timestamp: timestamp,
+      scene: scene,
+      test_file: testFile,
+      environment: environment
+    };
+
     // Core HTTP metrics
     if (data.metrics.http_req_duration) {
-      rows.push([timestamp, 'http_req_duration_avg', data.metrics.http_req_duration.values.avg.toFixed(2), 'ms', scene, testFile, environment]);
-      rows.push([timestamp, 'http_req_duration_p95', data.metrics.http_req_duration.values['p(95)'].toFixed(2), 'ms', scene, testFile, environment]);
-      rows.push([timestamp, 'http_req_duration_min', data.metrics.http_req_duration.values.min.toFixed(2), 'ms', scene, testFile, environment]);
-      rows.push([timestamp, 'http_req_duration_max', data.metrics.http_req_duration.values.max.toFixed(2), 'ms', scene, testFile, environment]);
+      metrics.http_req_duration_avg = data.metrics.http_req_duration.values.avg.toFixed(2);
+      metrics.http_req_duration_p95 = data.metrics.http_req_duration.values['p(95)'].toFixed(2);
+      metrics.http_req_duration_min = data.metrics.http_req_duration.values.min.toFixed(2);
+      metrics.http_req_duration_max = data.metrics.http_req_duration.values.max.toFixed(2);
     }
 
     if (data.metrics.http_req_failed) {
-      rows.push([timestamp, 'http_req_failed_rate', (data.metrics.http_req_failed.values.rate * 100).toFixed(2), 'percent', scene, testFile, environment]);
+      metrics.http_req_failed_rate = (data.metrics.http_req_failed.values.rate * 100).toFixed(2);
     }
 
     if (data.metrics.http_reqs) {
-      rows.push([timestamp, 'http_reqs_count', data.metrics.http_reqs.values.count, 'count', scene, testFile, environment]);
-      rows.push([timestamp, 'http_reqs_rate', data.metrics.http_reqs.values.rate.toFixed(2), 'per_second', scene, testFile, environment]);
+      metrics.http_reqs_count = data.metrics.http_reqs.values.count;
+      metrics.http_reqs_rate = data.metrics.http_reqs.values.rate.toFixed(2);
     }
 
     if (data.metrics.vus_max) {
-      rows.push([timestamp, 'vus_max', data.metrics.vus_max.values.max, 'users', scene, testFile, environment]);
+      metrics.vus_max = data.metrics.vus_max.values.max;
     }
 
-    // Custom metrics
+    // Custom auth metrics
     Object.keys(data.metrics).forEach(metricName => {
       if (metricName.includes('_errors') || metricName.includes('_response_time') || metricName.includes('_requests')) {
         const metric = data.metrics[metricName];
         
         if (metric.values.rate !== undefined) {
-          rows.push([timestamp, metricName, (metric.values.rate * 100).toFixed(2), 'percent', scene, testFile, environment]);
+          metrics[metricName + '_rate'] = (metric.values.rate * 100).toFixed(2);
         }
         
         if (metric.values.avg !== undefined) {
-          rows.push([timestamp, metricName + '_avg', metric.values.avg.toFixed(2), 'ms', scene, testFile, environment]);
+          metrics[metricName + '_avg'] = metric.values.avg.toFixed(2);
         }
         
         if (metric.values.count !== undefined) {
-          rows.push([timestamp, metricName, metric.values.count, 'count', scene, testFile, environment]);
+          metrics[metricName + '_count'] = metric.values.count;
         }
 
         if (metric.values['p(95)'] !== undefined) {
-          rows.push([timestamp, metricName + '_p95', metric.values['p(95)'].toFixed(2), 'ms', scene, testFile, environment]);
+          metrics[metricName + '_p95'] = metric.values['p(95)'].toFixed(2);
         }
       }
     });
 
-    return rows.map(row => row.join(',')).join('\n');
+    // Generate CSV with headers and one data row
+    const headers = Object.keys(metrics).join(',');
+    const values = Object.values(metrics).join(',');
+    
+    return `${headers}\n${values}`;
   }
 
   static generateSummaryReport(data) {

@@ -46,3 +46,8 @@ credentials.json
 # ESLint cache
 .eslintcache
 .claude
+
+# Docker and Grafana
+docker-compose.override.yml
+grafana/data/
+grafana/logs/

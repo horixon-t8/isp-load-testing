@@ -19,7 +19,13 @@
     "lint:fix": "eslint . --fix",
     "fmt": "prettier --write .",
     "fmt:check": "prettier --check .",
-    "quality": "npm run lint && npm run fmt:check"
+    "quality": "npm run lint && npm run fmt:check",
+    "grafana": "npm run grafana:start",
+    "grafana:start": "docker-compose up -d && node utils/wait-and-open.js",
+    "grafana:up": "docker-compose up -d",
+    "grafana:down": "docker-compose down",
+    "grafana:logs": "docker-compose logs -f grafana",
+    "grafana:open": "node utils/open-browser.js"
   },
   "keywords": [
     "k6",

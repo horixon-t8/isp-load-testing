@@ -44,6 +44,10 @@ Examples:
   node cli-runner.js --scene homepage --tests all             # All homepage tests
   node cli-runner.js --scene quotation --tests 1,3 --users 10 --duration 2m
   node cli-runner.js --scene homepage --tests 1-2 --export-csv
+
+📊 Grafana Integration:
+  npm run grafana                                             # Start Grafana and open browser
+  When tests run with --export-csv, Grafana will open automatically after success
 `);
 }
 
@@ -121,6 +125,20 @@ function runSingleTest(sceneName, testFile, options) {
   } catch (error) {
     console.error(`❌ ${testFile} failed:`, error.message);
     return false;
+  }
+}
+
+function openGrafanaAfterSuccess(hasSuccessfulTests, hasReports) {
+  if (hasSuccessfulTests && hasReports) {
+    console.log('\n🎉 Tests completed successfully!');
+    console.log('📊 Opening Grafana to view your reports...');
+    
+    try {
+      execSync('node utils/open-browser.js', { stdio: 'inherit' });
+    } catch (error) {
+      console.log('🌐 Grafana is available at: http://localhost:3000');
+      console.log('💡 Run "npm run grafana" to start Grafana if it\'s not running');
+    }
   }
 }
 
@@ -359,6 +377,9 @@ async function runTests(options) {
   if (options.exportCsv) {
     console.log('📄 CSV reports generated in reports/ directory');
   }
+
+  // Open Grafana if tests passed and CSV reports were generated
+  openGrafanaAfterSuccess(successCount > 0, options.exportCsv);
 }
 
 async function main() {
@@ -425,6 +446,9 @@ async function main() {
   if (options.exportCsv) {
     console.log('📄 CSV reports generated in reports/ directory');
   }
+
+  // Open Grafana if tests passed and CSV reports were generated
+  openGrafanaAfterSuccess(successCount > 0, options.exportCsv);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

@@ -1,0 +1,12 @@
+apiVersion: 1
+
+datasources:
+  - name: CSV-Reports
+    type: marcusolsson-csv-datasource
+    uid: csv-reports
+    access: proxy
+    url: http://file-server
+    isDefault: true
+    jsonData:
+      storage: http
+    editable: true
