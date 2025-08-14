@@ -102,7 +102,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "avg by (__name__) (rate(k6_http_req_duration_sum[1m]) / rate(k6_http_req_duration_count[1m]) * 1000)",
+          "expr": "rate(k6_http_req_duration_sum[1m]) / rate(k6_http_req_duration_count[1m])",
           "legendFormat": "http_req_duration_avg_ms",
           "refId": "A"
         },
@@ -111,7 +111,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "histogram_quantile(0.95, sum(rate(k6_http_req_duration_bucket[1m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(k6_http_req_duration_bucket[1m])) by (le))",
           "legendFormat": "http_req_duration_p95_ms",
           "refId": "B"
         }
@@ -199,7 +199,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(k6_http_req_failed_total[1m])",
+          "expr": "rate(k6_http_req_failed[1m])",
           "legendFormat": "http_req_failed_rate",
           "refId": "A"
         }
@@ -287,7 +287,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(k6_http_reqs_total[1m])",
+          "expr": "rate(k6_http_reqs[1m])",
           "legendFormat": "http_reqs_rate",
           "refId": "A"
         }
@@ -375,7 +375,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "max(k6_vus{instance=~\".*\"})",
+          "expr": "max(k6_vus)",
           "legendFormat": "vus_max",
           "refId": "A"
         }
@@ -463,7 +463,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "avg(rate(k6_metrics_auth_login_response_time_sum[1m]) / rate(k6_metrics_auth_login_response_time_count[1m]) * 1000)",
+          "expr": "rate(k6_metrics_auth_login_response_time_sum[1m]) / rate(k6_metrics_auth_login_response_time_count[1m])",
           "legendFormat": "auth_login_response_time_avg_ms",
           "refId": "A"
         },
@@ -472,7 +472,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "histogram_quantile(0.95, sum(rate(k6_metrics_auth_login_response_time_bucket[1m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(k6_metrics_auth_login_response_time_bucket[1m])) by (le))",
           "legendFormat": "auth_login_response_time_p95_ms",
           "refId": "B"
         }

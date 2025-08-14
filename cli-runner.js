@@ -112,7 +112,7 @@ function runSingleTest(sceneName, testFile, options) {
 
   try {
     const outputFlag = options.prometheus
-      ? '--out experimental-prometheus'
+      ? '--out experimental-prometheus-rw'
       : '';
     const command = `${envVars} k6 run ${outputFlag} main.js`;
     console.log(`📋 Command: ${command}`);
