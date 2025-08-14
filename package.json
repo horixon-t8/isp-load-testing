@@ -2,24 +2,19 @@
   "name": "isp-load-testing",
   "version": "1.0.0",
   "description": "K6 load testing suite for ISP API endpoints",
+  "type": "module",
   "main": "main.js",
   "scripts": {
-    "test": "k6 run main.js",
-    "test:homepage": "k6 run main.js --env SCENE=homepage",
-    "test:quotation:list": "k6 run main.js --env SCENE=quotation --env QUOTATION_FLOW=list --env EXPORT_CSV=true",
-    "test:quotation:detail": "k6 run main.js --env SCENE=quotation --env QUOTATION_FLOW=detail",
-    "test:quotation:create": "k6 run main.js --env SCENE=quotation --env QUOTATION_FLOW=create",
-    "test:quotation:complete": "k6 run main.js --env SCENE=quotation --env QUOTATION_FLOW=complete",
-    "test:light": "k6 run main.js --env TEST_TYPE=light",
-    "test:heavy": "k6 run main.js --env TEST_TYPE=heavy",
-    "test:spike": "k6 run main.js --env TEST_TYPE=spike",
-    "test:staging": "k6 run main.js --env ENV=staging",
-    "test:production": "k6 run main.js --env ENV=production",
-    "test:all": "k6 run main.js --env RUN_ALL=true",
-    "test:export": "k6 run main.js --env EXPORT_HTML=true --env EXPORT_CSV=true",
-    "test:custom": "k6 run main.js --env SCENE=homepage --env USERS=100 --env DURATION=5m",
+    "test": "node cli-runner.js",
+    "test:help": "node cli-runner.js --help",
+    "test:select": "node cli-runner.js",
+    "test:homepage": "node cli-runner.js --scene homepage",
+    "test:quotation": "node cli-runner.js --scene quotation",
+    "test:light": "node cli-runner.js --users 5 --duration 1m",
+    "test:heavy": "node cli-runner.js --users 50 --duration 5m",
+    "test:spike": "node cli-runner.js --users 100 --duration 30s",
     "clean": "rm -rf reports/*.html reports/*.csv summary.json",
-    "setup": "mkdir -p reports",
+    "setup": "mkdir -p reports && echo 'Reports directory created'",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "fmt": "prettier --write .",
@@ -41,7 +36,10 @@
     "eslint-plugin-import": "^2.29.1",
     "prettier": "^3.2.5"
   },
-  "dependencies": {},
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "inquirer": "^12.9.2"
+  },
   "engines": {
     "k6": ">=0.45.0"
   }

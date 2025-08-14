@@ -6,35 +6,40 @@ const config = ConfigLoader.getConfig();
 
 export const options = config.options;
 
-console.log('🚀 Starting K6 Test Suite');
-console.log(`📊 Environment: ${config.environment}`);
-console.log(`🎯 Base URL: ${config.baseUrl}`);
-console.log(`⚙️  Test Type: ${config.testType}`);
-
-if (__ENV.SCENE) {
-  console.log(`🎬 Scene: ${__ENV.SCENE}`);
-}
+let setupCompleted = false;
 
 export function setup() {
-  console.log('\n📋 Test Configuration:');
-  console.log(`   Environment: ${config.environment}`);
-  console.log(`   Test Type: ${config.testType}`);
-  console.log(`   Base URL: ${config.baseUrl}`);
+  if (!setupCompleted) {
+    console.log('🚀 Starting K6 Test Suite');
+    console.log(`📊 Environment: ${config.environment}`);
+    console.log(`🎯 Base URL: ${config.baseUrl}`);
+    console.log(`⚙️  Test Type: ${config.testType}`);
+    
+    if (__ENV.SCENE) {
+      console.log(`🎬 Scene: ${__ENV.SCENE}`);
+    }
+    
+    console.log('\n📋 Test Configuration:');
+    console.log(`   Environment: ${config.environment}`);
+    console.log(`   Test Type: ${config.testType}`);
+    console.log(`   Base URL: ${config.baseUrl}`);
 
-  if (__ENV.SCENE) {
-    console.log(`   Scene: ${__ENV.SCENE}`);
-  }
-  if (__ENV.USERS) {
-    console.log(`   Target Users: ${__ENV.USERS}`);
-  }
-  if (__ENV.DURATION) {
-    console.log(`   Duration: ${__ENV.DURATION}`);
-  }
-  if (__ENV.RUN_ALL) {
-    console.log(`   Run All Tests: ${__ENV.RUN_ALL}`);
-  }
+    if (__ENV.SCENE) {
+      console.log(`   Scene: ${__ENV.SCENE}`);
+    }
+    if (__ENV.USERS) {
+      console.log(`   Target Users: ${__ENV.USERS}`);
+    }
+    if (__ENV.DURATION) {
+      console.log(`   Duration: ${__ENV.DURATION}`);
+    }
+    if (__ENV.RUN_ALL) {
+      console.log(`   Run All Tests: ${__ENV.RUN_ALL}`);
+    }
 
-  console.log('\n🏁 Test execution starting...\n');
+    console.log('\n🏁 Test execution starting...\n');
+    setupCompleted = true;
+  }
 
   return { config };
 }
@@ -46,6 +51,7 @@ export default function (data) {
   try {
     const result = testRunner.runScene(scene);
 
+    // Only log errors, not success messages on every iteration
     if (!result.success) {
       console.error(`❌ Scene '${scene}' failed`);
     }
@@ -75,8 +81,13 @@ export function handleSummary(data) {
   }
 
   if (__ENV.EXPORT_CSV === 'true') {
-    reports['reports/report.csv'] = ReportGenerator.generateCSVReport(data);
-    console.log('📊 CSV report generated: reports/report.csv');
+    const scene = __ENV.SCENE || 'unknown';
+    const testFile = __ENV.TEST_FILE || 'all';
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const fileName = `reports/${scene}-${testFile}-${timestamp}.csv`;
+    
+    reports[fileName] = ReportGenerator.generateCSVReport(data);
+    console.log(`📊 Grafana CSV report generated: ${fileName}`);
   }
 
   return reports;

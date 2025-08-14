@@ -19,7 +19,7 @@ export class ConfigLoader {
   }
 
   static getConfig() {
-    const env = __ENV.ENV || 'staging';
+    const env = __ENV.ENV || 'development';
     const testType = __ENV.TEST_TYPE || 'default';
 
     const envConfig = this.loadEnvironmentConfig(env);
@@ -30,7 +30,7 @@ export class ConfigLoader {
       testType: testType,
       baseUrl: envConfig.baseUrl,
       timeout: envConfig.timeout,
-      authToken: envConfig.authToken,
+      testUser: envConfig.testUser,
       options: {
         scenarios: testSettings.scenarios,
         thresholds: testSettings.thresholds

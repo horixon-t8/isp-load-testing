@@ -45,3 +45,4 @@ credentials.json
 
 # ESLint cache
 .eslintcache
+.claude

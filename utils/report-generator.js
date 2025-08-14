@@ -1,4 +1,9 @@
 export class ReportGenerator {
+  static ensureReportsDirectory() {
+    // K6's handleSummary automatically creates directories for file paths
+    // This is a placeholder for documentation purposes
+    return true;
+  }
   static generateHTMLReport(data) {
     const timestamp = new Date().toISOString();
     const duration = (data.state.testRunDurationMs / 1000).toFixed(2);
@@ -107,43 +112,60 @@ export class ReportGenerator {
   }
 
   static generateCSVReport(data) {
+    return this.generateGrafanaCSV(data);
+  }
+
+  static generateGrafanaCSV(data) {
+    const timestamp = new Date().toISOString();
     const rows = [];
-    rows.push(['Metric', 'Value', 'Unit']);
+    
+    // Grafana-compatible timeseries format
+    rows.push(['timestamp', 'metric_name', 'value', 'unit', 'scene', 'test_file', 'environment']);
 
-    rows.push(['Test Duration', (data.state.testRunDurationMs / 1000).toFixed(2), 'seconds']);
-    rows.push(['Max VUs', data.metrics.vus_max ? data.metrics.vus_max.values.max : 0, 'users']);
-    rows.push([
-      'Total Requests',
-      data.metrics.http_reqs ? data.metrics.http_reqs.values.count : 0,
-      'count'
-    ]);
-    rows.push([
-      'Failed Requests',
-      data.metrics.http_req_failed
-        ? (data.metrics.http_req_failed.values.rate * 100).toFixed(2)
-        : 0,
-      'percent'
-    ]);
-    rows.push([
-      'Avg Response Time',
-      data.metrics.http_req_duration ? data.metrics.http_req_duration.values.avg.toFixed(2) : 0,
-      'ms'
-    ]);
-    rows.push([
-      '95th Percentile',
-      data.metrics.http_req_duration
-        ? data.metrics.http_req_duration.values['p(95)'].toFixed(2)
-        : 0,
-      'ms'
-    ]);
+    const scene = __ENV.SCENE || 'unknown';
+    const testFile = __ENV.TEST_FILE || 'unknown';
+    const environment = __ENV.ENVIRONMENT || 'unknown';
 
+    // Core HTTP metrics
+    if (data.metrics.http_req_duration) {
+      rows.push([timestamp, 'http_req_duration_avg', data.metrics.http_req_duration.values.avg.toFixed(2), 'ms', scene, testFile, environment]);
+      rows.push([timestamp, 'http_req_duration_p95', data.metrics.http_req_duration.values['p(95)'].toFixed(2), 'ms', scene, testFile, environment]);
+      rows.push([timestamp, 'http_req_duration_min', data.metrics.http_req_duration.values.min.toFixed(2), 'ms', scene, testFile, environment]);
+      rows.push([timestamp, 'http_req_duration_max', data.metrics.http_req_duration.values.max.toFixed(2), 'ms', scene, testFile, environment]);
+    }
+
+    if (data.metrics.http_req_failed) {
+      rows.push([timestamp, 'http_req_failed_rate', (data.metrics.http_req_failed.values.rate * 100).toFixed(2), 'percent', scene, testFile, environment]);
+    }
+
+    if (data.metrics.http_reqs) {
+      rows.push([timestamp, 'http_reqs_count', data.metrics.http_reqs.values.count, 'count', scene, testFile, environment]);
+      rows.push([timestamp, 'http_reqs_rate', data.metrics.http_reqs.values.rate.toFixed(2), 'per_second', scene, testFile, environment]);
+    }
+
+    if (data.metrics.vus_max) {
+      rows.push([timestamp, 'vus_max', data.metrics.vus_max.values.max, 'users', scene, testFile, environment]);
+    }
+
+    // Custom metrics
     Object.keys(data.metrics).forEach(metricName => {
-      if (metricName.includes('_errors') || metricName.includes('_response_time')) {
+      if (metricName.includes('_errors') || metricName.includes('_response_time') || metricName.includes('_requests')) {
         const metric = data.metrics[metricName];
+        
         if (metric.values.rate !== undefined) {
-          rows.push([metricName, (metric.values.rate * 100).toFixed(2), 'percent']);
-        } else if (metric.values.avg !== undefined) {
-          rows.push([metricName, metric.values.avg.toFixed(2), 'ms']);
+          rows.push([timestamp, metricName, (metric.values.rate * 100).toFixed(2), 'percent', scene, testFile, environment]);
+        }
+        
+        if (metric.values.avg !== undefined) {
+          rows.push([timestamp, metricName + '_avg', metric.values.avg.toFixed(2), 'ms', scene, testFile, environment]);
+        }
+        
+        if (metric.values.count !== undefined) {
+          rows.push([timestamp, metricName, metric.values.count, 'count', scene, testFile, environment]);
+        }
+
+        if (metric.values['p(95)'] !== undefined) {
+          rows.push([timestamp, metricName + '_p95', metric.values['p(95)'].toFixed(2), 'ms', scene, testFile, environment]);
         }
       }
     });
