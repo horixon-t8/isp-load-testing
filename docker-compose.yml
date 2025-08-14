@@ -59,18 +59,6 @@ services:
       - "traefik.http.routers.grafana.entrypoints=web"
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
 
-  k6:
-    image: grafana/k6:latest
-    container_name: k6-load-testing
-    environment:
-      - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
-    volumes:
-      - ./scenes:/scripts
-    depends_on:
-      - traefik
-    networks:
-      - grafana-network
-    command: run /scripts/homepage/01-auth-login.js
 
 volumes:
   grafana-storage:
