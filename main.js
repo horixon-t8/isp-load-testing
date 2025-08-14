@@ -70,15 +70,39 @@ export function teardown(data) {
 }
 
 export function handleSummary(data) {
+  // Generate timestamp for report names in YYYYMMDDHHmmss format
+  const now = new Date();
+  const timestamp =
+    now.getFullYear().toString() +
+    (now.getMonth() + 1).toString().padStart(2, '0') +
+    now.getDate().toString().padStart(2, '0') +
+    now.getHours().toString().padStart(2, '0') +
+    now.getMinutes().toString().padStart(2, '0') +
+    now.getSeconds().toString().padStart(2, '0');
+
+  // Extract scene and test information
+  const scene = __ENV.SCENE || 'default';
+  const testFile = __ENV.TEST_FILE || 'all-tests';
+  const testName = testFile.replace('.js', '');
+  const env = __ENV.ENV || 'development';
+
+  // Create descriptive report names
+  const reportBaseName = `${env}_${timestamp}_${scene}_${testName}`;
+
   const reports = {
     'summary.json': JSON.stringify(data, null, 2),
     stdout: ReportGenerator.generateSummaryReport(data)
   };
 
-  if (__ENV.EXPORT_HTML === 'true') {
-    reports['reports/report.html'] = ReportGenerator.generateHTMLReport(data);
-    console.log('📄 HTML report generated: reports/report.html');
-  }
+  // Always generate HTML and CSV reports with descriptive names
+  const htmlReportPath = `reports/${reportBaseName}.html`;
+  const csvReportPath = `reports/${reportBaseName}.csv`;
+
+  reports[htmlReportPath] = ReportGenerator.generateHTMLReport(data);
+  reports[csvReportPath] = ReportGenerator.generateCSVReport(data);
+
+  console.log(`📄 HTML report generated: ${htmlReportPath}`);
+  console.log(`📊 CSV report generated: ${csvReportPath}`);
 
   return reports;
 }

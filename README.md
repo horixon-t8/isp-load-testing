@@ -243,14 +243,22 @@ k6 run main.js --out experimental-prometheus-rw
 | **CSV Report** | `reports/report.csv` | CSV | Spreadsheet analysis |
 | **Prometheus** | Live Dashboard | Metrics | Real-time monitoring |
 
-### Generate Reports
+### Automatic Report Generation
+
+**HTML and CSV reports are generated automatically** after every test execution with descriptive filenames:
+
+- **HTML Report**: `reports/{scene}-{test}-{timestamp}.html` - Visual dashboard with metrics and charts  
+- **CSV Report**: `reports/{scene}-{test}-{timestamp}.csv` - Raw data for spreadsheet analysis
+- **JSON Summary**: `summary.json` - Complete metrics in JSON format
+
+**Example report names:**
+- `reports/development_20250814231023_homepage_01-auth-login.html`
+- `reports/development_20250814165437_quotation_01-list-quotations-.csv`
+- `reports/development_20250814103015_homepage_all-tests.html`
 
 ```bash
-# HTML report
-k6 run main.js --env EXPORT_HTML=true
-
-# CSV report  
-k6 run main.js --env EXPORT_CSV=true
+# Reports are created automatically - no additional flags needed
+node cli-runner.js --scene homepage --tests 1
 
 # Clean up reports
 npm run clean
