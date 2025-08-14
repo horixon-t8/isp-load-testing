@@ -1,10 +1,10 @@
 import { group, sleep } from 'k6';
 import { Rate } from 'k6/metrics';
 
-import { testListQuotations } from './list-quotations.js';
-import { testCreateQuotation } from './create-quotation.js';
-import { testGetQuotationDetail } from './get-quotation-detail.js';
-import { testSubmitQuotationRequest, testCheckQuotationPdf } from './submit-quotation.js';
+import { testListQuotations } from './01-list-quotations.js';
+import { testCreateQuotation } from './03-create-quotation.js';
+import { testGetQuotationDetail } from './02-get-quotation-detail.js';
+import { testSubmitQuotationRequest, testCheckQuotationPdf } from './04-submit-quotation.js';
 
 const quotationListFlowErrors = new Rate('quotation_list_flow_errors');
 const quotationDetailFlowErrors = new Rate('quotation_detail_flow_errors');

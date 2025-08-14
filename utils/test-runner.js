@@ -8,8 +8,8 @@ import {
 import { testAuthMe } from '../scenes/homepage/auth-me.js';
 import { testAuthFeatures } from '../scenes/homepage/auth-features.js';
 import { testMasterCategories } from '../scenes/homepage/master-categories.js';
-import { testListQuotations } from '../scenes/quotation/list-quotations.js';
-import { testCreateQuotation } from '../scenes/quotation/create-quotation.js';
+import { testListQuotations } from '../scenes/quotation/01-list-quotations.js';
+import { testCreateQuotation } from '../scenes/quotation/03-create-quotation.js';
 
 export class TestRunner {
   constructor(config) {
