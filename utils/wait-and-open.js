@@ -3,19 +3,22 @@
 import { exec } from 'child_process';
 import { setTimeout } from 'timers/promises';
 
-const GRAFANA_URL = 'http://localhost:3000';
+const GRAFANA_URL = 'http://localhost:18080/grafana';
 const MAX_RETRIES = 30;
 const RETRY_INTERVAL = 1000; // 1 second
 
 async function checkGrafanaHealth() {
   return new Promise((resolve) => {
-    exec('curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health', (error, stdout) => {
-      if (!error && stdout.trim() === '200') {
-        resolve(true);
-      } else {
-        resolve(false);
+    exec(
+      'curl -s -o /dev/null -w "%{http_code}" http://localhost:18080/grafana/api/health',
+      (error, stdout) => {
+        if (!error && stdout.trim() === '200') {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
       }
-    });
+    );
   });
 }
 

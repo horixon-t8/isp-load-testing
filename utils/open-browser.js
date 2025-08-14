@@ -2,7 +2,7 @@
 
 import { exec } from 'child_process';
 
-const GRAFANA_URL = 'http://localhost:3000/d/k6-load-testing/k6-load-testing-dashboard';
+const GRAFANA_URL = 'http://localhost:18080/grafana/d/k6-load-testing/k6-load-testing-dashboard';
 
 function openBrowser(url) {
   let command;

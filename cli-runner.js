@@ -100,6 +100,8 @@ function runSingleTest(sceneName, testFile, options) {
     `ENVIRONMENT=${options.environment}`,
     `USERS=${options.users}`,
     `DURATION=${options.duration}`,
+    // Set Prometheus endpoint for Docker proxy
+    options.prometheus ? 'K6_PROMETHEUS_RW_SERVER_URL=http://localhost:18080/prometheus/api/v1/write' : '',
     // Pass through username environment variables
     process.env.DEV_TEST_USERNAME ? `DEV_TEST_USERNAME=${process.env.DEV_TEST_USERNAME}` : '',
     process.env.STAGING_TEST_USERNAME ? `STAGING_TEST_USERNAME=${process.env.STAGING_TEST_USERNAME}` : '',
@@ -138,7 +140,7 @@ function openGrafanaAfterSuccess(hasSuccessfulTests, enabled) {
     try {
       execSync('node utils/open-browser.js', { stdio: 'inherit' });
     } catch (error) {
-      console.log('🌐 Grafana is available at: http://localhost:3000');
+      console.log('🌐 Grafana is available at: http://localhost:18080/grafana');
       console.log('💡 Run "npm run grafana" to start Prometheus+Grafana if it\'s not running');
     }
   }
@@ -285,7 +287,7 @@ async function confirmPrometheus() {
       type: 'confirm',
       name: 'usePrometheus',
       message: '📊 Stream metrics to Prometheus (Grafana)?',
-      default: false
+      default: true
     }
   ]);
   
