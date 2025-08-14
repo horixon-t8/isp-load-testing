@@ -80,15 +80,5 @@ export function handleSummary(data) {
     console.log('📄 HTML report generated: reports/report.html');
   }
 
-  if (__ENV.EXPORT_CSV === 'true') {
-    const scene = __ENV.SCENE || 'unknown';
-    const testFile = __ENV.TEST_FILE || 'all';
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const fileName = `reports/${scene}-${testFile}-${timestamp}.csv`;
-    
-    reports[fileName] = ReportGenerator.generateCSVReport(data);
-    console.log(`📊 Grafana CSV report generated: ${fileName}`);
-  }
-
   return reports;
 }

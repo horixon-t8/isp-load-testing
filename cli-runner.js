@@ -35,7 +35,7 @@ Options:
   --environment <env>      Environment (development, staging, production)
   --users <number>         Number of virtual users
   --duration <time>        Test duration (e.g., 30s, 5m)
-  --export-csv             Export results as CSV for Grafana
+  --prometheus             Send metrics to Prometheus (Grafana dashboard)
   --interactive, -i        Start interactive mode
   --help                   Show this help
 
@@ -43,11 +43,11 @@ Examples:
   node cli-runner.js                                          # Interactive mode
   node cli-runner.js --scene homepage --tests all             # All homepage tests
   node cli-runner.js --scene quotation --tests 1,3 --users 10 --duration 2m
-  node cli-runner.js --scene homepage --tests 1-2 --export-csv
+  node cli-runner.js --scene homepage --tests 1-2 --prometheus
 
 📊 Grafana Integration:
-  npm run grafana                                             # Start Grafana and open browser
-  When tests run with --export-csv, Grafana will open automatically after success
+  npm run grafana                                             # Start Prometheus+Grafana and open browser
+  Use --prometheus to stream metrics to Prometheus while running
 `);
 }
 
@@ -58,7 +58,7 @@ function parseArgs(args) {
     environment: 'development',
     users: 1,
     duration: '30s',
-    exportCsv: false
+    prometheus: false
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -78,8 +78,8 @@ function parseArgs(args) {
       case '--duration':
         options.duration = args[++i];
         break;
-      case '--export-csv':
-        options.exportCsv = true;
+      case '--prometheus':
+        options.prometheus = true;
         break;
       case '--help':
         showUsage();
@@ -100,7 +100,6 @@ function runSingleTest(sceneName, testFile, options) {
     `ENVIRONMENT=${options.environment}`,
     `USERS=${options.users}`,
     `DURATION=${options.duration}`,
-    options.exportCsv ? 'EXPORT_CSV=true' : '',
     // Pass through username environment variables
     process.env.DEV_TEST_USERNAME ? `DEV_TEST_USERNAME=${process.env.DEV_TEST_USERNAME}` : '',
     process.env.STAGING_TEST_USERNAME ? `STAGING_TEST_USERNAME=${process.env.STAGING_TEST_USERNAME}` : '',
@@ -112,7 +111,10 @@ function runSingleTest(sceneName, testFile, options) {
   ].filter(Boolean).join(' ');
 
   try {
-    const command = `${envVars} k6 run main.js`;
+    const outputFlag = options.prometheus
+      ? '--out experimental-prometheus'
+      : '';
+    const command = `${envVars} k6 run ${outputFlag} main.js`;
     console.log(`📋 Command: ${command}`);
     
     execSync(command, { 
@@ -128,8 +130,8 @@ function runSingleTest(sceneName, testFile, options) {
   }
 }
 
-function openGrafanaAfterSuccess(hasSuccessfulTests, hasReports) {
-  if (hasSuccessfulTests && hasReports) {
+function openGrafanaAfterSuccess(hasSuccessfulTests, enabled) {
+  if (hasSuccessfulTests && enabled) {
     console.log('\n🎉 Tests completed successfully!');
     console.log('📊 Opening Grafana to view your reports...');
     
@@ -137,7 +139,7 @@ function openGrafanaAfterSuccess(hasSuccessfulTests, hasReports) {
       execSync('node utils/open-browser.js', { stdio: 'inherit' });
     } catch (error) {
       console.log('🌐 Grafana is available at: http://localhost:3000');
-      console.log('💡 Run "npm run grafana" to start Grafana if it\'s not running');
+      console.log('💡 Run "npm run grafana" to start Prometheus+Grafana if it\'s not running');
     }
   }
 }
@@ -275,19 +277,19 @@ async function selectDuration() {
   return duration;
 }
 
-async function confirmExportCsv() {
+async function confirmPrometheus() {
   clearScreen();
   
-  const { exportCsv } = await inquirer.prompt([
+  const { usePrometheus } = await inquirer.prompt([
     {
       type: 'confirm',
-      name: 'exportCsv',
-      message: '📊 Export CSV for Grafana?',
-      default: true
+      name: 'usePrometheus',
+      message: '📊 Stream metrics to Prometheus (Grafana)?',
+      default: false
     }
   ]);
   
-  return exportCsv;
+  return usePrometheus;
 }
 
 async function interactiveMode() {
@@ -301,7 +303,7 @@ async function interactiveMode() {
     const environment = await selectEnvironment();
     const users = await selectUsers();
     const duration = await selectDuration();
-    const exportCsv = await confirmExportCsv();
+    const prometheus = await confirmPrometheus();
     
     clearScreen();
     console.log('📋 Test Configuration Summary:');
@@ -311,7 +313,7 @@ async function interactiveMode() {
     console.log(`  Environment: ${environment}`);
     console.log(`  Users: ${users}`);
     console.log(`  Duration: ${duration}`);
-    console.log(`  Export CSV: ${exportCsv ? 'Yes' : 'No'}\n`);
+    console.log(`  Prometheus: ${prometheus ? 'Yes' : 'No'}\n`);
     
     const { confirm } = await inquirer.prompt([
       {
@@ -329,7 +331,7 @@ async function interactiveMode() {
         environment,
         users,
         duration,
-        exportCsv
+          prometheus
       };
       
       clearScreen();
@@ -374,12 +376,8 @@ async function runTests(options) {
   console.log(`✅ Passed: ${successCount}/${selectedTests.length}`);
   console.log(`❌ Failed: ${selectedTests.length - successCount}/${selectedTests.length}`);
 
-  if (options.exportCsv) {
-    console.log('📄 CSV reports generated in reports/ directory');
-  }
-
-  // Open Grafana if tests passed and CSV reports were generated
-  openGrafanaAfterSuccess(successCount > 0, options.exportCsv);
+  // Open Grafana if tests passed and Prometheus was enabled
+  openGrafanaAfterSuccess(successCount > 0, options.prometheus);
 }
 
 async function main() {
@@ -443,12 +441,8 @@ async function main() {
   console.log(`✅ Passed: ${successCount}/${selectedTests.length}`);
   console.log(`❌ Failed: ${selectedTests.length - successCount}/${selectedTests.length}`);
 
-  if (options.exportCsv) {
-    console.log('📄 CSV reports generated in reports/ directory');
-  }
-
-  // Open Grafana if tests passed and CSV reports were generated
-  openGrafanaAfterSuccess(successCount > 0, options.exportCsv);
+  // Open Grafana if tests passed and Prometheus was enabled
+  openGrafanaAfterSuccess(successCount > 0, options.prometheus);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

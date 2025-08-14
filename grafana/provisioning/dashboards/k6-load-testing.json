@@ -24,8 +24,8 @@
   "panels": [
     {
       "datasource": {
-        "type": "marcusolsson-csv-datasource",
-        "uid": "csv-reports"
+        "type": "prometheus",
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -99,30 +99,21 @@
       "targets": [
         {
           "datasource": {
-            "type": "marcusolsson-csv-datasource",
-            "uid": "csv-reports"
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "decimalSeparator": ".",
-          "delimiter": ",",
-          "header": true,
-          "ignoreUnknown": false,
-          "path": "*.csv",
-          "refId": "A",
-          "schema": [
-            {
-              "name": "timestamp",
-              "type": "time"
-            },
-            {
-              "name": "http_req_duration_avg",
-              "type": "number"
-            },
-            {
-              "name": "http_req_duration_p95",
-              "type": "number"
-            }
-          ],
-          "skipRows": 0
+          "expr": "avg by (__name__) (rate(k6_http_req_duration_sum[1m]) / rate(k6_http_req_duration_count[1m]) * 1000)",
+          "legendFormat": "http_req_duration_avg_ms",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.95, sum(rate(k6_http_req_duration_bucket[1m])) by (le)) * 1000",
+          "legendFormat": "http_req_duration_p95_ms",
+          "refId": "B"
         }
       ],
       "title": "HTTP Request Duration",
@@ -130,8 +121,8 @@
     },
     {
       "datasource": {
-        "type": "marcusolsson-csv-datasource",
-        "uid": "csv-reports"
+        "type": "prometheus",
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -205,26 +196,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "marcusolsson-csv-datasource",
-            "uid": "csv-reports"
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "decimalSeparator": ".",
-          "delimiter": ",",
-          "header": true,
-          "ignoreUnknown": false,
-          "path": "*.csv",
-          "refId": "A",
-          "schema": [
-            {
-              "name": "timestamp",
-              "type": "time"
-            },
-            {
-              "name": "http_req_failed_rate",
-              "type": "number"
-            }
-          ],
-          "skipRows": 0
+          "expr": "rate(k6_http_req_failed_total[1m])",
+          "legendFormat": "http_req_failed_rate",
+          "refId": "A"
         }
       ],
       "title": "HTTP Request Failure Rate",
@@ -232,8 +209,8 @@
     },
     {
       "datasource": {
-        "type": "marcusolsson-csv-datasource",
-        "uid": "csv-reports"
+        "type": "prometheus",
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -307,26 +284,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "marcusolsson-csv-datasource",
-            "uid": "csv-reports"
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "decimalSeparator": ".",
-          "delimiter": ",",
-          "header": true,
-          "ignoreUnknown": false,
-          "path": "*.csv",
-          "refId": "A",
-          "schema": [
-            {
-              "name": "timestamp",
-              "type": "time"
-            },
-            {
-              "name": "http_reqs_rate",
-              "type": "number"
-            }
-          ],
-          "skipRows": 0
+          "expr": "rate(k6_http_reqs_total[1m])",
+          "legendFormat": "http_reqs_rate",
+          "refId": "A"
         }
       ],
       "title": "HTTP Requests Rate",
@@ -334,8 +297,8 @@
     },
     {
       "datasource": {
-        "type": "marcusolsson-csv-datasource",
-        "uid": "csv-reports"
+        "type": "prometheus",
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -409,26 +372,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "marcusolsson-csv-datasource",
-            "uid": "csv-reports"
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "decimalSeparator": ".",
-          "delimiter": ",",
-          "header": true,
-          "ignoreUnknown": false,
-          "path": "*.csv",
-          "refId": "A",
-          "schema": [
-            {
-              "name": "timestamp",
-              "type": "time"
-            },
-            {
-              "name": "vus_max",
-              "type": "number"
-            }
-          ],
-          "skipRows": 0
+          "expr": "max(k6_vus{instance=~\".*\"})",
+          "legendFormat": "vus_max",
+          "refId": "A"
         }
       ],
       "title": "Virtual Users (Max)",
@@ -436,8 +385,8 @@
     },
     {
       "datasource": {
-        "type": "marcusolsson-csv-datasource",
-        "uid": "csv-reports"
+        "type": "prometheus",
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -511,30 +460,21 @@
       "targets": [
         {
           "datasource": {
-            "type": "marcusolsson-csv-datasource",
-            "uid": "csv-reports"
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "decimalSeparator": ".",
-          "delimiter": ",",
-          "header": true,
-          "ignoreUnknown": false,
-          "path": "*.csv",
-          "refId": "A",
-          "schema": [
-            {
-              "name": "timestamp",
-              "type": "time"
-            },
-            {
-              "name": "auth_login_response_time_avg",
-              "type": "number"
-            },
-            {
-              "name": "auth_login_response_time_p95",
-              "type": "number"
-            }
-          ],
-          "skipRows": 0
+          "expr": "avg(rate(k6_metrics_auth_login_response_time_sum[1m]) / rate(k6_metrics_auth_login_response_time_count[1m]) * 1000)",
+          "legendFormat": "auth_login_response_time_avg_ms",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.95, sum(rate(k6_metrics_auth_login_response_time_bucket[1m])) by (le)) * 1000",
+          "legendFormat": "auth_login_response_time_p95_ms",
+          "refId": "B"
         }
       ],
       "title": "Auth Login Response Times",
