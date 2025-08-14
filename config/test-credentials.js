@@ -6,13 +6,13 @@ export default {
     if (!envConfig || !envConfig.testUser) {
       throw new Error(`No test user configured for environment: ${environment}`);
     }
-    
+
     return {
       username: envConfig.testUser.username,
       password: envConfig.testUser.password
     };
   },
-  
+
   testUser: {
     get username() {
       const env = __ENV.ENVIRONMENT || 'development';

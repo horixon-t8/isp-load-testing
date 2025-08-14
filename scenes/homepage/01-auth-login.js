@@ -17,26 +17,34 @@ export function testAuthLogin(baseUrl) {
   if (loginAttempted) {
     return storedLoginResult;
   }
-  
+
   // Skip login test if using placeholder credentials
-  const isPlaceholderCredentials = 
+  const isPlaceholderCredentials =
     testCredentials.testUser.username === 'PLACEHOLDER_USERNAME' ||
     testCredentials.testUser.password === 'PLACEHOLDER_PASSWORD' ||
     !testCredentials.testUser.username ||
     !testCredentials.testUser.password;
-    
+
   if (isPlaceholderCredentials) {
     if (!loginSkipMessageShown) {
-      console.log(`⚠️  Skipping login test - using default credentials for ${__ENV.ENVIRONMENT || 'development'} environment.`);
+      console.log(
+        `⚠️  Skipping login test - using default credentials for ${__ENV.ENVIRONMENT || 'development'} environment.`
+      );
       console.log('   Set environment-specific credential variables:');
-      console.log('   DEV_TEST_USERNAME=your_username DEV_TEST_PASSWORD=your_password (for development)');
-      console.log('   STAGING_TEST_USERNAME=your_username STAGING_TEST_PASSWORD=your_password (for staging)');
-      console.log('   PROD_TEST_USERNAME=your_username PROD_TEST_PASSWORD=your_password (for production)');
+      console.log(
+        '   DEV_TEST_USERNAME=your_username DEV_TEST_PASSWORD=your_password (for development)'
+      );
+      console.log(
+        '   STAGING_TEST_USERNAME=your_username STAGING_TEST_PASSWORD=your_password (for staging)'
+      );
+      console.log(
+        '   PROD_TEST_USERNAME=your_username PROD_TEST_PASSWORD=your_password (for production)'
+      );
       loginSkipMessageShown = true;
     }
-    storedLoginResult = { 
-      success: true, 
-      response: { status: 200, timings: { duration: 0 }, body: '{"skipped": true}' }, 
+    storedLoginResult = {
+      success: true,
+      response: { status: 200, timings: { duration: 0 }, body: '{"skipped": true}' },
       duration: 0,
       accessToken: null,
       skipped: true
@@ -110,13 +118,13 @@ export function testAuthLogin(baseUrl) {
     console.error('Failed to parse login response:', e.message);
   }
 
-  storedLoginResult = { 
-    success, 
-    response, 
+  storedLoginResult = {
+    success,
+    response,
     duration: response.timings.duration,
-    accessToken 
+    accessToken
   };
-  
+
   loginAttempted = true;
   return storedLoginResult;
 }

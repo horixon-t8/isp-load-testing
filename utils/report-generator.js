@@ -152,17 +152,21 @@ export class ReportGenerator {
 
     // Custom auth metrics
     Object.keys(data.metrics).forEach(metricName => {
-      if (metricName.includes('_errors') || metricName.includes('_response_time') || metricName.includes('_requests')) {
+      if (
+        metricName.includes('_errors') ||
+        metricName.includes('_response_time') ||
+        metricName.includes('_requests')
+      ) {
         const metric = data.metrics[metricName];
-        
+
         if (metric.values.rate !== undefined) {
           metrics[metricName + '_rate'] = (metric.values.rate * 100).toFixed(2);
         }
-        
+
         if (metric.values.avg !== undefined) {
           metrics[metricName + '_avg'] = metric.values.avg.toFixed(2);
         }
-        
+
         if (metric.values.count !== undefined) {
           metrics[metricName + '_count'] = metric.values.count;
         }
@@ -176,7 +180,7 @@ export class ReportGenerator {
     // Generate CSV with headers and one data row
     const headers = Object.keys(metrics).join(',');
     const values = Object.values(metrics).join(',');
-    
+
     return `${headers}\n${values}`;
   }
 

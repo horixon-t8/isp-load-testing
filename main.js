@@ -14,11 +14,11 @@ export function setup() {
     console.log(`📊 Environment: ${config.environment}`);
     console.log(`🎯 Base URL: ${config.baseUrl}`);
     console.log(`⚙️  Test Type: ${config.testType}`);
-    
+
     if (__ENV.SCENE) {
       console.log(`🎬 Scene: ${__ENV.SCENE}`);
     }
-    
+
     console.log('\n📋 Test Configuration:');
     console.log(`   Environment: ${config.environment}`);
     console.log(`   Test Type: ${config.testType}`);

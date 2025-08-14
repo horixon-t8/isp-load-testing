@@ -8,7 +8,7 @@ const MAX_RETRIES = 30;
 const RETRY_INTERVAL = 1000; // 1 second
 
 async function checkGrafanaHealth() {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     exec(
       'curl -s -o /dev/null -w "%{http_code}" http://localhost:18080/grafana/api/health',
       (error, stdout) => {
@@ -24,7 +24,7 @@ async function checkGrafanaHealth() {
 
 function openBrowser(url) {
   let command;
-  
+
   switch (process.platform) {
     case 'darwin': // macOS
       command = `open "${url}"`;
@@ -37,7 +37,7 @@ function openBrowser(url) {
       break;
   }
 
-  exec(command, (error) => {
+  exec(command, error => {
     if (error) {
       console.log(`🌐 Grafana is ready at: ${url}`);
       console.log('Please open the URL manually in your browser.');
@@ -49,20 +49,20 @@ function openBrowser(url) {
 
 async function waitForGrafana() {
   console.log('⏳ Waiting for Grafana to be ready...');
-  
+
   for (let i = 0; i < MAX_RETRIES; i++) {
     const isHealthy = await checkGrafanaHealth();
-    
+
     if (isHealthy) {
       console.log('✅ Grafana is ready!');
       openBrowser(GRAFANA_URL);
       return;
     }
-    
+
     process.stdout.write('.');
     await setTimeout(RETRY_INTERVAL);
   }
-  
+
   console.log('\n⚠️  Grafana took longer than expected to start.');
   console.log(`🌐 Please check manually at: ${GRAFANA_URL}`);
 }

@@ -73,7 +73,10 @@ export function testCheckQuotationPdf(baseUrl, headers, quotationId) {
     return { success: false, response: null, duration: 0 };
   }
 
-  const response = http.get(`${baseUrl}/quotation/quotation-version-quote-files?keyword=${quotationId}`, { headers });
+  const response = http.get(
+    `${baseUrl}/quotation/quotation-version-quote-files?keyword=${quotationId}`,
+    { headers }
+  );
 
   const success = check(response, {
     'quotation PDF status is 200': r => r.status === 200,
@@ -100,7 +103,11 @@ export function testCheckQuotationPdf(baseUrl, headers, quotationId) {
         const data = JSON.parse(r.body);
         if (data.data && data.data.length > 0) {
           const file = data.data[0];
-          return file.fileName && file.mimeType === 'application/pdf' && file.quotationVersionID === quotationId;
+          return (
+            file.fileName &&
+            file.mimeType === 'application/pdf' &&
+            file.quotationVersionID === quotationId
+          );
         }
         return false;
       } catch (e) {

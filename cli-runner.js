@@ -2,8 +2,8 @@
 
 import { execSync } from 'child_process';
 import { mkdirSync } from 'fs';
-import { config } from 'dotenv';
 
+import { config } from 'dotenv';
 import inquirer from 'inquirer';
 
 import { TestSelector } from './utils/test-selector.js';
@@ -93,7 +93,7 @@ function parseArgs(args) {
 
 function runSingleTest(sceneName, testFile, options) {
   console.log(`\n🧪 Running ${sceneName}/${testFile}...`);
-  
+
   const envVars = [
     `SCENE=${sceneName}`,
     `TEST_FILE=${testFile}`,
@@ -101,29 +101,35 @@ function runSingleTest(sceneName, testFile, options) {
     `USERS=${options.users}`,
     `DURATION=${options.duration}`,
     // Set Prometheus endpoint for Docker proxy
-    options.prometheus ? 'K6_PROMETHEUS_RW_SERVER_URL=http://localhost:18080/prometheus/api/v1/write' : '',
+    options.prometheus
+      ? 'K6_PROMETHEUS_RW_SERVER_URL=http://localhost:18080/prometheus/api/v1/write'
+      : '',
     // Pass through username environment variables
     process.env.DEV_TEST_USERNAME ? `DEV_TEST_USERNAME=${process.env.DEV_TEST_USERNAME}` : '',
-    process.env.STAGING_TEST_USERNAME ? `STAGING_TEST_USERNAME=${process.env.STAGING_TEST_USERNAME}` : '',
+    process.env.STAGING_TEST_USERNAME
+      ? `STAGING_TEST_USERNAME=${process.env.STAGING_TEST_USERNAME}`
+      : '',
     process.env.PROD_TEST_USERNAME ? `PROD_TEST_USERNAME=${process.env.PROD_TEST_USERNAME}` : '',
     // Pass through password environment variables
     process.env.DEV_TEST_PASSWORD ? `DEV_TEST_PASSWORD=${process.env.DEV_TEST_PASSWORD}` : '',
-    process.env.STAGING_TEST_PASSWORD ? `STAGING_TEST_PASSWORD=${process.env.STAGING_TEST_PASSWORD}` : '',
+    process.env.STAGING_TEST_PASSWORD
+      ? `STAGING_TEST_PASSWORD=${process.env.STAGING_TEST_PASSWORD}`
+      : '',
     process.env.PROD_TEST_PASSWORD ? `PROD_TEST_PASSWORD=${process.env.PROD_TEST_PASSWORD}` : ''
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   try {
-    const outputFlag = options.prometheus
-      ? '--out experimental-prometheus-rw'
-      : '';
+    const outputFlag = options.prometheus ? '--out experimental-prometheus-rw' : '';
     const command = `${envVars} k6 run ${outputFlag} main.js`;
     console.log(`📋 Command: ${command}`);
-    
-    execSync(command, { 
+
+    execSync(command, {
       stdio: 'inherit',
       cwd: process.cwd()
     });
-    
+
     console.log(`✅ ${testFile} completed successfully`);
     return true;
   } catch (error) {
@@ -136,7 +142,7 @@ function openGrafanaAfterSuccess(hasSuccessfulTests, enabled) {
   if (hasSuccessfulTests && enabled) {
     console.log('\n🎉 Tests completed successfully!');
     console.log('📊 Opening Grafana to view your reports...');
-    
+
     try {
       execSync('node utils/open-browser.js', { stdio: 'inherit' });
     } catch (error) {
@@ -161,7 +167,7 @@ function clearScreen() {
 async function selectScene() {
   clearScreen();
   const scenes = TestSelector.getAvailableScenes();
-  
+
   const { scene } = await inquirer.prompt([
     {
       type: 'list',
@@ -174,14 +180,14 @@ async function selectScene() {
       pageSize: 10
     }
   ]);
-  
+
   return scene;
 }
 
 async function selectTests(sceneName) {
   clearScreen();
   const tests = TestSelector.getTestsForScene(sceneName);
-  
+
   const choices = [
     ...tests.map(test => ({
       name: `🧪 ${test.number}. ${test.name}`,
@@ -193,7 +199,7 @@ async function selectTests(sceneName) {
       value: 'all'
     }
   ];
-  
+
   const { selectedTests } = await inquirer.prompt([
     {
       type: 'checkbox',
@@ -201,7 +207,7 @@ async function selectTests(sceneName) {
       message: `🔢 Select tests for ${sceneName}:`,
       choices,
       pageSize: 15,
-      validate: (answer) => {
+      validate: answer => {
         if (answer.length === 0) {
           return 'You must choose at least one test.';
         }
@@ -209,18 +215,18 @@ async function selectTests(sceneName) {
       }
     }
   ]);
-  
+
   if (selectedTests.includes('all')) {
     return 'all';
   }
-  
+
   return selectedTests.join(',');
 }
 
 async function selectEnvironment() {
   clearScreen();
   const environments = ['development', 'staging', 'production'];
-  
+
   const { environment } = await inquirer.prompt([
     {
       type: 'list',
@@ -233,20 +239,20 @@ async function selectEnvironment() {
       default: 'development'
     }
   ]);
-  
+
   return environment;
 }
 
 async function selectUsers() {
   clearScreen();
-  
+
   const { users } = await inquirer.prompt([
     {
       type: 'number',
       name: 'users',
       message: '👥 Number of virtual users:',
       default: 1,
-      validate: (value) => {
+      validate: value => {
         if (value < 1 || value > 1000) {
           return 'Please enter a number between 1 and 1000.';
         }
@@ -254,20 +260,20 @@ async function selectUsers() {
       }
     }
   ]);
-  
+
   return users;
 }
 
 async function selectDuration() {
   clearScreen();
-  
+
   const { duration } = await inquirer.prompt([
     {
       type: 'input',
       name: 'duration',
       message: '⏱️  Test duration (e.g., 30s, 2m, 1h):',
       default: '30s',
-      validate: (value) => {
+      validate: value => {
         if (!/^\d+[smh]$/.test(value)) {
           return 'Please enter a valid duration (e.g., 30s, 2m, 1h).';
         }
@@ -275,13 +281,13 @@ async function selectDuration() {
       }
     }
   ]);
-  
+
   return duration;
 }
 
 async function confirmPrometheus() {
   clearScreen();
-  
+
   const { usePrometheus } = await inquirer.prompt([
     {
       type: 'confirm',
@@ -290,7 +296,7 @@ async function confirmPrometheus() {
       default: true
     }
   ]);
-  
+
   return usePrometheus;
 }
 
@@ -298,7 +304,7 @@ async function interactiveMode() {
   clearScreen();
   console.log('🧪 ISP Load Testing - Interactive Mode');
   console.log('=====================================\n');
-  
+
   try {
     const scene = await selectScene();
     const tests = await selectTests(scene);
@@ -306,7 +312,7 @@ async function interactiveMode() {
     const users = await selectUsers();
     const duration = await selectDuration();
     const prometheus = await confirmPrometheus();
-    
+
     clearScreen();
     console.log('📋 Test Configuration Summary:');
     console.log('==============================');
@@ -316,7 +322,7 @@ async function interactiveMode() {
     console.log(`  Users: ${users}`);
     console.log(`  Duration: ${duration}`);
     console.log(`  Prometheus: ${prometheus ? 'Yes' : 'No'}\n`);
-    
+
     const { confirm } = await inquirer.prompt([
       {
         type: 'confirm',
@@ -325,7 +331,7 @@ async function interactiveMode() {
         default: false
       }
     ]);
-    
+
     if (confirm) {
       const options = {
         scene,
@@ -333,16 +339,15 @@ async function interactiveMode() {
         environment,
         users,
         duration,
-          prometheus
+        prometheus
       };
-      
+
       clearScreen();
       console.log('🚀 Starting tests...\n');
       await runTests(options);
     } else {
       console.log('❌ Test execution cancelled.');
     }
-    
   } catch (error) {
     console.error('💥 Error in interactive mode:', error.message);
   }
@@ -351,12 +356,12 @@ async function interactiveMode() {
 async function runTests(options) {
   const availableTests = TestSelector.getTestsForScene(options.scene);
   const selectedTests = TestSelector.parseTestSelection(options.tests, availableTests);
-  
+
   console.log(`🎯 Running ${selectedTests.length} test(s) for scene: ${options.scene}`);
   console.log(`📊 Environment: ${options.environment}`);
   console.log(`👥 Users: ${options.users}`);
   console.log(`⏱️  Duration: ${options.duration}`);
-  
+
   // Check if login test is selected and show credential info
   const hasLoginTest = selectedTests.some(test => test.file === '01-auth-login.js');
   if (hasLoginTest) {
@@ -364,14 +369,16 @@ async function runTests(options) {
     console.log('   To use real credentials, set: TEST_PASSWORD=your_password');
     console.log('   Example: TEST_PASSWORD=realpass node cli-runner.js --scene homepage --tests 1');
   }
-  
+
   let successCount = 0;
   const results = [];
 
   for (const test of selectedTests) {
     const success = runSingleTest(options.scene, test.file, options);
     results.push({ test: test.name, success });
-    if (success) {successCount++;}
+    if (success) {
+      successCount++;
+    }
   }
 
   console.log('\n📊 Test Summary:');
@@ -436,7 +443,9 @@ async function main() {
   for (const test of selectedTests) {
     const success = runSingleTest(options.scene, test.file, options);
     results.push({ test: test.name, success });
-    if (success) {successCount++;}
+    if (success) {
+      successCount++;
+    }
   }
 
   console.log('\n📊 Test Summary:');

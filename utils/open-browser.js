@@ -6,7 +6,7 @@ const GRAFANA_URL = 'http://localhost:18080/grafana/d/k6-load-testing/k6-load-te
 
 function openBrowser(url) {
   let command;
-  
+
   switch (process.platform) {
     case 'darwin': // macOS
       command = `open "${url}"`;
@@ -19,7 +19,7 @@ function openBrowser(url) {
       break;
   }
 
-  exec(command, (error) => {
+  exec(command, error => {
     if (error) {
       console.log(`🌐 Grafana is available at: ${url}`);
       console.log('Please open the URL manually in your browser.');

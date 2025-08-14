@@ -24,7 +24,7 @@ export class TestRunner {
     if (this.authToken) {
       return {
         ...this.headers,
-        'Authorization': `Bearer ${this.authToken}`
+        Authorization: `Bearer ${this.authToken}`
       };
     }
     return this.headers;
@@ -32,7 +32,7 @@ export class TestRunner {
 
   runScene(sceneName) {
     const testFile = __ENV.TEST_FILE;
-    
+
     if (testFile) {
       return this.runSingleTest(sceneName, testFile);
     } else {
@@ -42,13 +42,13 @@ export class TestRunner {
 
   runSingleTest(sceneName, testFile) {
     const testKey = `${sceneName}/${testFile}`;
-    
+
     // Only log once per test, not on every k6 iteration
     if (!globalLoggedTests.has(testKey)) {
       console.log(`🧪 Running single test: ${testKey}`);
       globalLoggedTests.add(testKey);
     }
-    
+
     const testFunction = this.getTestFunction(sceneName, testFile);
     if (!testFunction) {
       console.error(`❌ Test function not found for: ${testFile}`);
@@ -88,7 +88,7 @@ export class TestRunner {
         testFile: loginTest.file,
         ...loginResult
       });
-      
+
       if (!loginResult.success) {
         overallSuccess = false;
       }
@@ -96,15 +96,17 @@ export class TestRunner {
 
     // Run remaining tests with potential auth token
     for (const test of tests) {
-      if (test.file === '01-auth-login.js') {continue;} // Already ran above
-      
+      if (test.file === '01-auth-login.js') {
+        continue;
+      } // Already ran above
+
       const result = this.runSingleTest(sceneName, test.file);
       results.push({
         testName: test.name,
         testFile: test.file,
         ...result
       });
-      
+
       if (!result.success) {
         overallSuccess = false;
       }

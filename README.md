@@ -83,6 +83,7 @@ node cli-runner.js --interactive
 ```
 
 Guided prompts for:
+
 - **Scene Selection**: Homepage, Quotation
 - **Test Selection**: Individual tests, ranges (1-4), or all
 - **Environment**: Development, Staging, Production
@@ -103,45 +104,45 @@ node cli-runner.js --scene homepage --tests all --prometheus
 
 #### CLI Options
 
-| Option | Description | Example |
-|--------|-------------|---------|
-| `--scene <name>` | Test scene to run | `homepage`, `quotation` |
-| `--tests <selection>` | Test selection | `1`, `1,3`, `1-4`, `all` |
-| `--environment <env>` | Target environment | `development`, `staging`, `production` |
-| `--users <number>` | Virtual users (1-1000) | `10`, `50`, `100` |
-| `--duration <time>` | Test duration | `30s`, `2m`, `1h` |
-| `--prometheus` | Enable Prometheus metrics | - |
-| `--help` | Show usage help | - |
+| Option                | Description               | Example                                |
+| --------------------- | ------------------------- | -------------------------------------- |
+| `--scene <name>`      | Test scene to run         | `homepage`, `quotation`                |
+| `--tests <selection>` | Test selection            | `1`, `1,3`, `1-4`, `all`               |
+| `--environment <env>` | Target environment        | `development`, `staging`, `production` |
+| `--users <number>`    | Virtual users (1-1000)    | `10`, `50`, `100`                      |
+| `--duration <time>`   | Test duration             | `30s`, `2m`, `1h`                      |
+| `--prometheus`        | Enable Prometheus metrics | -                                      |
+| `--help`              | Show usage help           | -                                      |
 
 ## 🧪 Test Scenarios
 
 ### Homepage Scene - Authentication & Landing
 
-| Test | Endpoint | Purpose |
-|------|----------|---------|
-| `01-auth-login` | `POST /auth/login` | User authentication with token extraction |
-| `02-auth-me` | `GET /auth/me` | Authenticated user profile verification |
-| `03-auth-features` | `GET /auth/features` | User feature access permissions |
-| `04-master-categories` | `GET /master/categories` | Master data loading for UI |
+| Test                   | Endpoint                 | Purpose                                   |
+| ---------------------- | ------------------------ | ----------------------------------------- |
+| `01-auth-login`        | `POST /auth/login`       | User authentication with token extraction |
+| `02-auth-me`           | `GET /auth/me`           | Authenticated user profile verification   |
+| `03-auth-features`     | `GET /auth/features`     | User feature access permissions           |
+| `04-master-categories` | `GET /master/categories` | Master data loading for UI                |
 
 ### Quotation Scene - Insurance Workflows
 
-| Test | Endpoint | Purpose |
-|------|----------|---------|
-| `01-list-quotations` | `POST /quotation/requests/list` | Retrieve user quotations with filtering |
-| `02-get-quotation-detail` | `GET /quotation/detail/{uuid}` | Get specific quotation details |
-| `03-create-quotation` | `POST /quotation/save` | Create new insurance quotation |
-| `04-submit-quotation` | `POST /quotation/submit-request` | Submit quotation for processing |
+| Test                      | Endpoint                         | Purpose                                 |
+| ------------------------- | -------------------------------- | --------------------------------------- |
+| `01-list-quotations`      | `POST /quotation/requests/list`  | Retrieve user quotations with filtering |
+| `02-get-quotation-detail` | `GET /quotation/detail/{uuid}`   | Get specific quotation details          |
+| `03-create-quotation`     | `POST /quotation/save`           | Create new insurance quotation          |
+| `04-submit-quotation`     | `POST /quotation/submit-request` | Submit quotation for processing         |
 
 ## 🌍 Environment Configuration
 
 ### Available Environments
 
-| Environment | Base URL | Timeout | Purpose |
-|-------------|----------|---------|---------|
-| **Development** | `https://isp-api-dev.horixon-t8.com` | 5s | Development testing |
-| **Staging** | `https://isp-api-uat.horixon-t8.com` | 3s | Pre-production testing |
-| **Production** | `https://isp-api.horixon-t8.com` | 2s | Production monitoring |
+| Environment     | Base URL                             | Timeout | Purpose                |
+| --------------- | ------------------------------------ | ------- | ---------------------- |
+| **Development** | `https://isp-api-dev.horixon-t8.com` | 5s      | Development testing    |
+| **Staging**     | `https://isp-api-uat.horixon-t8.com` | 3s      | Pre-production testing |
+| **Production**  | `https://isp-api.horixon-t8.com`     | 2s      | Production monitoring  |
 
 ### Authentication Setup
 
@@ -152,7 +153,7 @@ Set environment-specific credentials:
 export DEV_TEST_USERNAME=your_dev_username
 export DEV_TEST_PASSWORD=your_dev_password
 
-# Staging  
+# Staging
 export STAGING_TEST_USERNAME=your_staging_username
 export STAGING_TEST_PASSWORD=your_staging_password
 
@@ -165,12 +166,12 @@ export PROD_TEST_PASSWORD=your_prod_password
 
 ### Predefined Load Patterns
 
-| Type | Virtual Users | Duration | Pattern | Use Case |
-|------|---------------|----------|---------|----------|
-| **Default** | 1 | 30s | Constant | Basic functionality testing |
-| **Light** | 10 | 2m | Constant | Light load validation |
-| **Heavy** | 10→500 | 17m | Ramping | Stress testing |
-| **Spike** | 50→1000→50 | Variable | Spike | Peak load simulation |
+| Type        | Virtual Users | Duration | Pattern  | Use Case                    |
+| ----------- | ------------- | -------- | -------- | --------------------------- |
+| **Default** | 1             | 30s      | Constant | Basic functionality testing |
+| **Light**   | 10            | 2m       | Constant | Light load validation       |
+| **Heavy**   | 10→500        | 17m      | Ramping  | Stress testing              |
+| **Spike**   | 50→1000→50    | Variable | Spike    | Peak load simulation        |
 
 ### NPM Script Shortcuts
 
@@ -205,7 +206,7 @@ node cli-runner.js --scene homepage --tests 1 --prometheus
 ### Available Metrics in Dashboard
 
 - **HTTP Request Duration**: Average and 95th percentile response times
-- **HTTP Request Failure Rate**: Real-time error rates  
+- **HTTP Request Failure Rate**: Real-time error rates
 - **HTTP Requests Rate**: Requests per second
 - **Virtual Users**: Current and maximum VU count
 - **Auth Login Response Times**: Authentication-specific metrics
@@ -214,7 +215,7 @@ node cli-runner.js --scene homepage --tests 1 --prometheus
 
 ```bash
 npm run grafana:start       # Start services + open browser
-npm run grafana:up          # Start services only  
+npm run grafana:up          # Start services only
 npm run grafana:down        # Stop all services
 npm run grafana:logs        # View service logs
 npm run grafana:open        # Open dashboard in browser
@@ -235,23 +236,24 @@ k6 run main.js --out experimental-prometheus-rw
 
 ### Available Report Types
 
-| Type | Location | Format | Use Case |
-|------|----------|--------|----------|
-| **Console** | Terminal | Text | Real-time monitoring |
-| **JSON Summary** | `summary.json` | JSON | Automated processing |
-| **HTML Report** | `reports/report.html` | HTML | Visual analysis |
-| **CSV Report** | `reports/report.csv` | CSV | Spreadsheet analysis |
-| **Prometheus** | Live Dashboard | Metrics | Real-time monitoring |
+| Type             | Location              | Format  | Use Case             |
+| ---------------- | --------------------- | ------- | -------------------- |
+| **Console**      | Terminal              | Text    | Real-time monitoring |
+| **JSON Summary** | `summary.json`        | JSON    | Automated processing |
+| **HTML Report**  | `reports/report.html` | HTML    | Visual analysis      |
+| **CSV Report**   | `reports/report.csv`  | CSV     | Spreadsheet analysis |
+| **Prometheus**   | Live Dashboard        | Metrics | Real-time monitoring |
 
 ### Automatic Report Generation
 
 **HTML and CSV reports are generated automatically** after every test execution with descriptive filenames:
 
-- **HTML Report**: `reports/{scene}-{test}-{timestamp}.html` - Visual dashboard with metrics and charts  
+- **HTML Report**: `reports/{scene}-{test}-{timestamp}.html` - Visual dashboard with metrics and charts
 - **CSV Report**: `reports/{scene}-{test}-{timestamp}.csv` - Raw data for spreadsheet analysis
 - **JSON Summary**: `summary.json` - Complete metrics in JSON format
 
 **Example report names:**
+
 - `reports/development_20250814231023_homepage_01-auth-login.html`
 - `reports/development_20250814165437_quotation_01-list-quotations-.csv`
 - `reports/development_20250814103015_homepage_all-tests.html`
@@ -268,19 +270,19 @@ npm run clean
 
 ### Default Thresholds
 
-| Metric | Threshold | Purpose |
-|--------|-----------|---------|
-| Response Time (95th percentile) | < 2s | Performance validation |
-| HTTP Error Rate | < 5% | Reliability validation |
-| Scene-specific Error Rate | < 2% | Business workflow validation |
+| Metric                          | Threshold | Purpose                      |
+| ------------------------------- | --------- | ---------------------------- |
+| Response Time (95th percentile) | < 2s      | Performance validation       |
+| HTTP Error Rate                 | < 5%      | Reliability validation       |
+| Scene-specific Error Rate       | < 2%      | Business workflow validation |
 
 ### Load-Specific Thresholds
 
-| Load Type | Response Time | Error Rate | Description |
-|-----------|---------------|------------|-------------|
-| **Light** | < 1.5s | < 2% | Optimal performance |
-| **Heavy** | < 3s | < 10% | Under stress |
-| **Spike** | < 5s | < 20% | Peak load handling |
+| Load Type | Response Time | Error Rate | Description         |
+| --------- | ------------- | ---------- | ------------------- |
+| **Light** | < 1.5s        | < 2%       | Optimal performance |
+| **Heavy** | < 3s          | < 10%      | Under stress        |
+| **Spike** | < 5s          | < 20%      | Peak load handling  |
 
 ## 🔧 Development and Maintenance
 
@@ -315,6 +317,7 @@ npm run test:help           # Show CLI help
 ### Common Issues
 
 **Authentication Failures**
+
 ```bash
 # Check credentials are set
 echo $DEV_TEST_USERNAME $DEV_TEST_PASSWORD
@@ -324,8 +327,9 @@ node cli-runner.js --scene homepage --tests 1 --environment development
 ```
 
 **Prometheus Connection Issues**
+
 ```bash
-# Ensure monitoring stack is running  
+# Ensure monitoring stack is running
 docker-compose ps
 
 # Check Prometheus endpoint
@@ -333,6 +337,7 @@ curl http://localhost:18080/prometheus/-/ready
 ```
 
 **Network Timeouts**
+
 ```bash
 # Check environment timeouts in config/environments.js
 # Adjust based on network conditions
@@ -384,7 +389,7 @@ const customErrorRate = new Rate('custom_errors');
 ## 📋 Requirements
 
 - **K6**: >= 0.45.0
-- **Node.js**: >= 16.0.0 
+- **Node.js**: >= 16.0.0
 - **Docker**: Latest version
 - **Docker Compose**: V2+ recommended
 

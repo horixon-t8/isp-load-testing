@@ -8,8 +8,8 @@ const listQuotationsRequests = new Counter('list_quotations_requests');
 
 export function testListQuotations(baseUrl, headers) {
   const payload = {
-    'type': 'MyWork',
-    'status': [
+    type: 'MyWork',
+    status: [
       'Draft',
       'SubmitToSSP',
       'SubmitToUW',
@@ -20,14 +20,16 @@ export function testListQuotations(baseUrl, headers) {
       'PendingPolicyIssue',
       'AppFormSubmitted'
     ],
-    'createDate': {},
-    'updateDate': {},
-    'page': 1,
-    'pageSize': 20,
-    'sort': {}
+    createDate: {},
+    updateDate: {},
+    page: 1,
+    pageSize: 20,
+    sort: {}
   };
 
-  const response = http.post(`${baseUrl}/quotation/requests/list`, JSON.stringify(payload), { headers });
+  const response = http.post(`${baseUrl}/quotation/requests/list`, JSON.stringify(payload), {
+    headers
+  });
 
   const success = check(response, {
     'quotation/requests/list status is 200': r => r.status === 200,
