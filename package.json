@@ -26,7 +26,11 @@
     "grafana:up": "docker-compose up -d",
     "grafana:down": "docker-compose down",
     "grafana:logs": "docker-compose logs -f grafana prometheus",
-    "grafana:open": "node utils/open-browser.js"
+    "grafana:open": "node utils/open-browser.js",
+    "data:export": "node utils/export-prometheus-data.js",
+    "data:import": "node utils/import-prometheus-data.js",
+    "data:backup": "tar -czf prometheus/backups/prometheus-$(date +%Y%m%d-%H%M%S).tar.gz prometheus/data/",
+    "data:restore": "node utils/restore-prometheus-data.js"
   },
   "keywords": [
     "k6",
