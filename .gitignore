@@ -47,7 +47,8 @@ credentials.json
 .eslintcache
 .claude
 
-# Docker and Grafana
+# Docker, Grafana and Prometheus
 docker-compose.override.yml
 grafana/data/
 grafana/logs/
+prometheus/data/
