@@ -102,8 +102,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(k6_http_req_duration_sum[1m]) / rate(k6_http_req_duration_count[1m])",
-          "legendFormat": "http_req_duration_avg_ms",
+          "expr": "k6_http_req_duration_p99",
+          "legendFormat": "http_req_duration_p99_ms",
           "refId": "A"
         },
         {
@@ -111,8 +111,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "histogram_quantile(0.95, sum(rate(k6_http_req_duration_bucket[1m])) by (le))",
-          "legendFormat": "http_req_duration_p95_ms",
+          "expr": "k6_http_req_duration_p99",
+          "legendFormat": "http_req_duration_p99_ms",
           "refId": "B"
         }
       ],
@@ -199,7 +199,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(k6_http_req_failed[1m])",
+          "expr": "k6_http_req_failed_rate",
           "legendFormat": "http_req_failed_rate",
           "refId": "A"
         }
@@ -287,7 +287,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(k6_http_reqs[1m])",
+          "expr": "k6_http_reqs_total",
           "legendFormat": "http_reqs_rate",
           "refId": "A"
         }
@@ -463,8 +463,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(k6_metrics_auth_login_response_time_sum[1m]) / rate(k6_metrics_auth_login_response_time_count[1m])",
-          "legendFormat": "auth_login_response_time_avg_ms",
+          "expr": "k6_auth_login_response_time_p99",
+          "legendFormat": "auth_login_response_time_p99_ms",
           "refId": "A"
         },
         {
@@ -472,8 +472,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "histogram_quantile(0.95, sum(rate(k6_metrics_auth_login_response_time_bucket[1m])) by (le))",
-          "legendFormat": "auth_login_response_time_p95_ms",
+          "expr": "k6_auth_login_response_time_p99",
+          "legendFormat": "auth_login_response_time_p99_ms",
           "refId": "B"
         }
       ],
