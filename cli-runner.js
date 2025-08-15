@@ -7,6 +7,7 @@ import { config } from 'dotenv';
 import inquirer from 'inquirer';
 
 import { TestSelector } from './utils/test-selector.js';
+import testSettings from './config/test-settings.js';
 
 // Load environment variables from .env file
 config();
@@ -33,8 +34,7 @@ Options:
   --scene <name>           Scene to test (homepage, quotation)
   --tests <selection>      Test selection (1,2,3 or 1-4 or all)
   --environment <env>      Environment (development, staging, production)
-  --users <number>         Number of virtual users
-  --duration <time>        Test duration (e.g., 30s, 5m)
+  --setting <name>         Test setting (default, constant-vus, ramping-vus, light, heavy, spike)
   --prometheus             Send metrics to Prometheus (Grafana dashboard)
   --interactive, -i        Start interactive mode
   --help                   Show this help
@@ -42,8 +42,9 @@ Options:
 Examples:
   node cli-runner.js                                          # Interactive mode
   node cli-runner.js --scene homepage --tests all             # All homepage tests
-  node cli-runner.js --scene quotation --tests 1,3 --users 10 --duration 2m
-  node cli-runner.js --scene homepage --tests 1-2 --prometheus
+  node cli-runner.js --scene quotation --tests 1,3 --setting light
+  node cli-runner.js --scene homepage --tests 1-2 --setting light --prometheus
+  node cli-runner.js --scene homepage --tests all --setting heavy
 
 📊 Grafana Integration:
   npm run grafana                                             # Start Prometheus+Grafana and open browser
@@ -56,9 +57,8 @@ function parseArgs(args) {
     scene: null,
     tests: 'all',
     environment: 'development',
-    users: 1,
-    duration: '30s',
-    prometheus: false
+    setting: 'default',
+    prometheus: true
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -72,11 +72,8 @@ function parseArgs(args) {
       case '--environment':
         options.environment = args[++i];
         break;
-      case '--users':
-        options.users = args[++i];
-        break;
-      case '--duration':
-        options.duration = args[++i];
+      case '--setting':
+        options.setting = args[++i];
         break;
       case '--prometheus':
         options.prometheus = true;
@@ -98,8 +95,7 @@ function runSingleTest(sceneName, testFile, options) {
     `SCENE=${sceneName}`,
     `TEST_FILE=${testFile}`,
     `ENVIRONMENT=${options.environment}`,
-    `USERS=${options.users}`,
-    `DURATION=${options.duration}`,
+    `TEST_SETTING=${options.setting || 'default'}`,
     // Set Prometheus endpoint for Docker proxy
     options.prometheus
       ? 'K6_PROMETHEUS_RW_SERVER_URL=http://localhost:18080/prometheus/api/v1/write'
@@ -162,6 +158,56 @@ function ensureReportsDirectory() {
 
 function clearScreen() {
   console.clear();
+}
+
+function generateTestSettingDescription(key, setting) {
+  const scenario = Object.values(setting.scenarios)[0];
+  const executor = scenario.executor;
+  const sleepDuration = setting.sleepDuration || 1;
+  const description = setting.description || 'Custom load testing configuration';
+  
+  let pattern = '';
+  
+  switch (executor) {
+    case 'constant-arrival-rate':
+      pattern = `${scenario.rate} req/s, up to ${scenario.maxVUs} VUs, ${sleepDuration}s think`;
+      break;
+    case 'constant-vus':
+      pattern = `${scenario.vus} VU, ${scenario.duration}, ${sleepDuration}s think`;
+      break;
+    case 'ramping-vus':
+      if (scenario.stages) {
+        const targets = scenario.stages.map(stage => stage.target);
+        const startVUs = scenario.startVUs || 0;
+        const maxTarget = Math.max(...targets);
+        const totalDuration = scenario.stages.reduce((sum, stage) => {
+          const duration = stage.duration;
+          const value = parseInt(duration);
+          const unit = duration.slice(-1);
+          return sum + (unit === 'm' ? value * 60 : value);
+        }, 0);
+        const durationStr = totalDuration >= 60 ? Math.round(totalDuration / 60) + 'm' : totalDuration + 's';
+        pattern = `${startVUs}→${maxTarget} VUs over ${durationStr}, ${sleepDuration}s think`;
+      }
+      break;
+    default:
+      pattern = `Custom, ${sleepDuration}s think`;
+  }
+  
+  const emoji = {
+    'default': '🏃',
+    'constant-vus': '👥', 
+    'ramping-vus': '📈',
+    'light': '💡',
+    'heavy': '💪',
+    'spike': '⚡'
+  }[key] || '⚙️';
+  
+  return {
+    name: `${emoji} ${key} - ${description} (${pattern})`,
+    value: key,
+    description
+  };
 }
 
 async function selectScene() {
@@ -243,27 +289,6 @@ async function selectEnvironment() {
   return environment;
 }
 
-async function selectUsers() {
-  clearScreen();
-
-  const { users } = await inquirer.prompt([
-    {
-      type: 'number',
-      name: 'users',
-      message: '👥 Number of virtual users:',
-      default: 1,
-      validate: value => {
-        if (value < 1 || value > 1000) {
-          return 'Please enter a number between 1 and 1000.';
-        }
-        return true;
-      }
-    }
-  ]);
-
-  return users;
-}
-
 async function selectDuration() {
   clearScreen();
 
@@ -271,11 +296,11 @@ async function selectDuration() {
     {
       type: 'input',
       name: 'duration',
-      message: '⏱️  Test duration (e.g., 30s, 2m, 1h):',
-      default: '30s',
+      message: '⏱️  Test duration (e.g., 10s, 30s, 2m, 1h):',
+      default: '10s',
       validate: value => {
         if (!/^\d+[smh]$/.test(value)) {
-          return 'Please enter a valid duration (e.g., 30s, 2m, 1h).';
+          return 'Please enter a valid duration (e.g., 10s, 30s, 2m, 1h).';
         }
         return true;
       }
@@ -283,6 +308,28 @@ async function selectDuration() {
   ]);
 
   return duration;
+}
+
+async function selectTestSetting() {
+  clearScreen();
+  
+  // Generate settings from config
+  const settings = Object.keys(testSettings).map(key => 
+    generateTestSettingDescription(key, testSettings[key])
+  );
+
+  const { setting } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'setting',
+      message: '⚙️  Select test setting:',
+      choices: settings,
+      default: 'default',
+      pageSize: 10
+    }
+  ]);
+
+  return setting;
 }
 
 async function confirmPrometheus() {
@@ -309,18 +356,34 @@ async function interactiveMode() {
     const scene = await selectScene();
     const tests = await selectTests(scene);
     const environment = await selectEnvironment();
-    const users = await selectUsers();
-    const duration = await selectDuration();
+    const setting = await selectTestSetting();
     const prometheus = await confirmPrometheus();
 
     clearScreen();
     console.log('📋 Test Configuration Summary:');
     console.log('==============================');
     console.log(`  Scene: ${scene}`);
+    
+    // Show test names, not just numbers
+    const availableTests = TestSelector.getTestsForScene(scene);
+    const selectedTests = TestSelector.parseTestSelection(tests, availableTests);
     console.log(`  Tests: ${tests}`);
+    if (selectedTests.length <= 5) {
+      selectedTests.forEach(test => {
+        console.log(`    → ${test.number}. ${test.name}`);
+      });
+    } else {
+      console.log(`    → ${selectedTests.length} tests selected`);
+    }
+    
     console.log(`  Environment: ${environment}`);
-    console.log(`  Users: ${users}`);
-    console.log(`  Duration: ${duration}`);
+    
+    // Get setting description
+    const settingConfig = testSettings[setting];
+    const settingDesc = generateTestSettingDescription(setting, settingConfig);
+    console.log(`  Setting: ${setting}`);
+    console.log(`    → ${settingDesc.name.split(' - ')[1]}`);
+    
     console.log(`  Prometheus: ${prometheus ? 'Yes' : 'No'}\n`);
 
     const { confirm } = await inquirer.prompt([
@@ -337,8 +400,7 @@ async function interactiveMode() {
         scene,
         tests,
         environment,
-        users,
-        duration,
+        setting,
         prometheus
       };
 
@@ -359,8 +421,7 @@ async function runTests(options) {
 
   console.log(`🎯 Running ${selectedTests.length} test(s) for scene: ${options.scene}`);
   console.log(`📊 Environment: ${options.environment}`);
-  console.log(`👥 Users: ${options.users}`);
-  console.log(`⏱️  Duration: ${options.duration}`);
+  console.log(`⚙️  Setting: ${options.setting || 'default'}`);
 
   // Check if login test is selected and show credential info
   const hasLoginTest = selectedTests.some(test => test.file === '01-auth-login.js');
@@ -432,10 +493,17 @@ async function main() {
     process.exit(1);
   }
 
+  // Validate test setting
+  const availableSettings = Object.keys(testSettings);
+  if (!availableSettings.includes(options.setting)) {
+    console.error(`❌ Unknown test setting: ${options.setting}`);
+    console.log('Available settings:', availableSettings.join(', '));
+    process.exit(1);
+  }
+
   console.log(`🎯 Running ${selectedTests.length} test(s) for scene: ${options.scene}`);
   console.log(`📊 Environment: ${options.environment}`);
-  console.log(`👥 Users: ${options.users}`);
-  console.log(`⏱️  Duration: ${options.duration}`);
+  console.log(`⚙️  Setting: ${options.setting || 'default'}`);
 
   let successCount = 0;
   const results = [];

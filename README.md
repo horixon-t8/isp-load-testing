@@ -87,7 +87,7 @@ Guided prompts for:
 - **Scene Selection**: Homepage, Quotation
 - **Test Selection**: Individual tests, ranges (1-4), or all
 - **Environment**: Development, Staging, Production
-- **Load Configuration**: Users (1-1000), Duration (30s, 2m, 1h)
+- **Test Settings**: Execution patterns with predefined VU counts and durations
 - **Monitoring**: Prometheus integration toggle
 
 ### 2. Command Line Mode
@@ -98,8 +98,9 @@ node cli-runner.js --scene <scene> --tests <selection> [options]
 
 # Examples
 node cli-runner.js --scene homepage --tests 1 --environment development
-node cli-runner.js --scene quotation --tests 1-3 --users 10 --duration 2m
-node cli-runner.js --scene homepage --tests all --prometheus
+node cli-runner.js --scene quotation --tests 1-3 --setting light
+node cli-runner.js --scene homepage --tests all --setting light --prometheus
+node cli-runner.js --scene quotation --tests 1-2 --setting heavy
 ```
 
 #### CLI Options
@@ -109,8 +110,7 @@ node cli-runner.js --scene homepage --tests all --prometheus
 | `--scene <name>`      | Test scene to run         | `homepage`, `quotation`                |
 | `--tests <selection>` | Test selection            | `1`, `1,3`, `1-4`, `all`               |
 | `--environment <env>` | Target environment        | `development`, `staging`, `production` |
-| `--users <number>`    | Virtual users (1-1000)    | `10`, `50`, `100`                      |
-| `--duration <time>`   | Test duration             | `30s`, `2m`, `1h`                      |
+| `--setting <name>`    | Test load pattern         | `default`, `light`, `heavy`, `spike`   |
 | `--prometheus`        | Enable Prometheus metrics | -                                      |
 | `--help`              | Show usage help           | -                                      |
 
@@ -164,7 +164,20 @@ export PROD_TEST_PASSWORD=your_prod_password
 
 ## 📊 Load Testing Configurations
 
-### Predefined Load Patterns
+### Test Settings (K6 Execution Scenarios)
+
+The CLI supports predefined test settings that configure K6's execution patterns with realistic user behavior timing. Use `--setting <name>` or select interactively:
+
+| Setting           | Executor             | Pattern                    | Think Time | Use Case                         |
+| ----------------- | -------------------- | -------------------------- | ---------- | -------------------------------- |
+| **default**       | constant-arrival-rate| 1 req/s, up to 5 VUs      | 1s         | Basic load test with steady rate |
+| **constant-vus**  | constant-vus         | 1 VU throughout            | 2s         | Fixed single user load test      |
+| **ramping-vus**   | ramping-vus          | 1→5→10→0 VUs over 40s     | 1.5s       | Gradual load increase/decrease   |
+| **light**         | constant-arrival-rate| 5 req/s, up to 20 VUs     | 1s         | Moderate load for everyday use   |
+| **heavy**         | ramping-vus          | 10→500 VUs over 20m        | 0.5s       | High stress with fast interactions|
+| **spike**         | ramping-vus          | 10→50→1000→50→0 VUs over 3m | 1s         | Sudden traffic spike simulation  |
+
+### Legacy Load Patterns (Deprecated)
 
 | Type        | Virtual Users | Duration | Pattern  | Use Case                    |
 | ----------- | ------------- | -------- | -------- | --------------------------- |
@@ -283,6 +296,188 @@ npm run clean
 | **Light** | < 1.5s        | < 2%       | Optimal performance |
 | **Heavy** | < 3s          | < 10%      | Under stress        |
 | **Spike** | < 5s          | < 20%      | Peak load handling  |
+
+## ⚙️ Customizing Test Settings
+
+### Modifying Existing Settings
+
+Test settings are defined in `config/test-settings.js`. Each setting contains:
+
+- **scenarios**: K6 execution configuration (VUs, duration, pattern)
+- **thresholds**: Performance acceptance criteria
+- **sleepDuration**: Wait time between requests (seconds)
+
+#### Example Setting Structure:
+
+```javascript
+export default {
+  'my-custom-setting': {
+    description: 'Custom moderate load test',  // CLI display description
+    scenarios: {
+      my_scenario: {
+        executor: 'constant-vus',        // Executor type
+        vus: 10,                        // Virtual users
+        duration: '2m'                  // Test duration
+      }
+    },
+    thresholds: {
+      http_req_duration: ['p(95)<2000'], // 95% of requests < 2s
+      http_req_failed: ['rate<0.05']     // Error rate < 5%
+    },
+    sleepDuration: 1.5                   // Think time between requests
+  }
+};
+```
+
+#### Current Settings Overview:
+
+```javascript
+// Each setting includes description, scenarios, thresholds, and sleepDuration
+default: {
+  description: 'Basic load test with steady 1 req/s',
+  executor: 'constant-arrival-rate', rate: 1, sleepDuration: 1
+}
+
+constant-vus: {
+  description: 'Fixed single user load test',
+  executor: 'constant-vus', vus: 1, sleepDuration: 2
+}
+
+light: {
+  description: 'Moderate load for everyday scenarios',
+  executor: 'constant-arrival-rate', rate: 5, sleepDuration: 1
+}
+
+heavy: {
+  description: 'High stress test with fast interactions',
+  executor: 'ramping-vus', 10→500 VUs, sleepDuration: 0.5
+}
+
+spike: {
+  description: 'Sudden traffic spike simulation',
+  executor: 'ramping-vus', 10→1000→10 VUs, sleepDuration: 1
+}
+```
+
+### Available K6 Executors
+
+| Executor              | Use Case                     | Key Parameters                    |
+| --------------------- | ---------------------------- | --------------------------------- |
+| `constant-vus`        | Fixed number of VUs          | `vus`, `duration`                 |
+| `constant-arrival-rate` | Fixed request rate         | `rate`, `timeUnit`, `maxVUs`      |
+| `ramping-vus`         | Gradually change VU count    | `startVUs`, `stages[]`            |
+| `ramping-arrival-rate` | Gradually change request rate| `startRate`, `stages[]`          |
+
+### Creating Custom Settings
+
+1. **Add new setting** to `config/test-settings.js`:
+
+```javascript
+// Add to existing export
+'stress-test': {
+  description: 'Custom stress test with peak load',  // Required for CLI display
+  scenarios: {
+    stress_scenario: {
+      executor: 'ramping-vus',
+      startVUs: 1,
+      stages: [
+        { duration: '1m', target: 50 },   // Ramp up
+        { duration: '3m', target: 100 },  // Stay at peak
+        { duration: '1m', target: 0 }     // Ramp down
+      ]
+    }
+  },
+  thresholds: {
+    http_req_duration: ['p(95)<3000'],
+    http_req_failed: ['rate<0.15']
+  },
+  sleepDuration: 2
+}
+```
+
+2. **Use the new setting**:
+
+```bash
+# Command line
+node cli-runner.js --scene homepage --tests all --setting stress-test
+
+# Interactive mode (will appear automatically in the list with your description)
+npm test
+```
+
+**Note:** The `description` field is **required** for new settings. It appears in the CLI interactive menu and helps users understand the setting's purpose.
+
+### Setting Guidelines
+
+- **sleepDuration (Think Time)**: 
+  - 0.5s: Fast interactions, stress scenarios
+  - 1.0s: Normal user browsing behavior
+  - 1.5-2s: Deliberate user actions, form filling
+- **thresholds**: Set realistic performance expectations
+- **VU scaling**: Start small, gradually increase for stress testing
+- **Duration**: Balance test thoroughness with execution time
+
+### Current Sleep Duration Strategy
+
+| Setting | Think Time | Rationale |
+|---------|------------|----------|
+| default | 1s | Normal browsing pace |
+| constant-vus | 2s | Deliberate single-user testing |
+| ramping-vus | 1.5s | Mixed user behavior patterns |
+| light | 1s | Realistic everyday usage |
+| heavy | 0.5s | Stress testing with fast interactions |
+| spike | 1s | Realistic burst traffic behavior |
+
+### Performance Threshold Examples
+
+```javascript
+thresholds: {
+  // Response time requirements
+  http_req_duration: ['p(95)<2000'],        // 95% under 2s
+  http_req_duration: ['p(99)<5000'],        // 99% under 5s
+  http_req_duration: ['avg<1000'],          // Average under 1s
+  
+  // Error rate requirements
+  http_req_failed: ['rate<0.05'],           // < 5% errors
+  http_req_failed: ['rate<0.01'],           // < 1% errors (strict)
+  
+  // Custom metric thresholds
+  login_duration: ['p(95)<3000'],           // Login-specific timing
+  quotation_errors: ['rate<0.02']           // Feature-specific errors
+}
+```
+
+### Ramping Patterns
+
+#### Load Test Pattern:
+```javascript
+stages: [
+  { duration: '2m', target: 10 },    // Gradual ramp up
+  { duration: '5m', target: 10 },    // Stay at target
+  { duration: '2m', target: 0 }      // Ramp down
+]
+```
+
+#### Stress Test Pattern:
+```javascript
+stages: [
+  { duration: '5m', target: 100 },   // Ramp to normal load
+  { duration: '10m', target: 200 },  // Increase to stress level
+  { duration: '5m', target: 300 },   // Push to breaking point
+  { duration: '10m', target: 200 },  // Back to stress level
+  { duration: '5m', target: 0 }      // Cool down
+]
+```
+
+#### Spike Test Pattern:
+```javascript
+stages: [
+  { duration: '1m', target: 50 },    // Normal load
+  { duration: '30s', target: 1000 }, // Sudden spike
+  { duration: '1m', target: 50 },    // Back to normal
+  { duration: '30s', target: 0 }     // End
+]
+```
 
 ## 🔧 Development and Maintenance
 

@@ -1,3 +1,5 @@
+import { sleep } from 'k6';
+
 import { testAuthLogin } from '../scenes/homepage/01-auth-login.js';
 import { testAuthMe } from '../scenes/homepage/02-auth-me.js';
 import { testAuthFeatures } from '../scenes/homepage/03-auth-features.js';
@@ -56,18 +58,25 @@ export class TestRunner {
     }
 
     try {
+      let result;
       // Handle login test specially to get auth token
       if (testFile === '01-auth-login.js') {
-        const result = testFunction(this.config.baseUrl);
+        result = testFunction(this.config.baseUrl);
         if (result.success && result.accessToken && !result.skipped) {
           this.authToken = result.accessToken;
         }
-        return result;
       } else {
         // For other tests, use authenticated headers if we have a token
         const headers = this.getAuthenticatedHeaders();
-        return testFunction(this.config.baseUrl, headers);
+        result = testFunction(this.config.baseUrl, headers);
       }
+
+      // Add sleep after test execution
+      if (this.config.sleepDuration > 0) {
+        sleep(this.config.sleepDuration);
+      }
+
+      return result;
     } catch (error) {
       console.error(`💥 Error running test ${testFile}:`, error.message);
       return { success: false, error: error.message };

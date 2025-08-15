@@ -27,9 +27,6 @@ export function setup() {
     if (__ENV.SCENE) {
       console.log(`   Scene: ${__ENV.SCENE}`);
     }
-    if (__ENV.USERS) {
-      console.log(`   Target Users: ${__ENV.USERS}`);
-    }
     if (__ENV.DURATION) {
       console.log(`   Duration: ${__ENV.DURATION}`);
     }

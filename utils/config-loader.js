@@ -20,34 +20,23 @@ export class ConfigLoader {
 
   static getConfig() {
     const env = __ENV.ENV || 'development';
-    const testType = __ENV.TEST_TYPE || 'default';
+    const testSetting = __ENV.TEST_SETTING || 'default';
 
     const envConfig = this.loadEnvironmentConfig(env);
-    const testSettings = this.loadTestSettings(testType);
+    const testSettings = this.loadTestSettings(testSetting);
 
     const config = {
       environment: env,
-      testType: testType,
+      testType: testSetting,
       baseUrl: envConfig.baseUrl,
       timeout: envConfig.timeout,
       testUser: envConfig.testUser,
+      sleepDuration: testSettings.sleepDuration || 1,
       options: {
         scenarios: testSettings.scenarios,
         thresholds: testSettings.thresholds
       }
     };
-
-    if (__ENV.USERS) {
-      Object.keys(config.options.scenarios).forEach(scenarioKey => {
-        const scenario = config.options.scenarios[scenarioKey];
-        if (scenario.vus !== undefined) {
-          scenario.vus = parseInt(__ENV.USERS);
-        }
-        if (scenario.startVUs !== undefined) {
-          scenario.startVUs = Math.min(parseInt(__ENV.USERS) / 10, 10);
-        }
-      });
-    }
 
     if (__ENV.DURATION) {
       Object.keys(config.options.scenarios).forEach(scenarioKey => {
