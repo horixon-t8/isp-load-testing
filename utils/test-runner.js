@@ -1,13 +1,7 @@
 import { sleep } from 'k6';
 
-import { testAuthLogin } from '../scenes/homepage/01-auth-login.js';
-import { testAuthMe } from '../scenes/homepage/02-auth-me.js';
-import { testAuthFeatures } from '../scenes/homepage/03-auth-features.js';
-import { testMasterCategories } from '../scenes/homepage/04-master-categories.js';
-import { testListQuotations } from '../scenes/quotation/01-list-quotations.js';
-import { testGetQuotationDetail } from '../scenes/quotation/02-get-quotation-detail.js';
-import { testCreateQuotation } from '../scenes/quotation/03-create-quotation.js';
-import { testSubmitQuotationRequest } from '../scenes/quotation/04-submit-quotation.js';
+import { getTestsForScene } from './test-config.js';
+import { getTestFunction } from './test-functions.js';
 
 // Global tracking to prevent repetitive logging across k6 iterations
 const globalLoggedTests = new Set();
@@ -129,36 +123,10 @@ export class TestRunner {
   }
 
   getTestsForScene(sceneName) {
-    const testFiles = {
-      homepage: [
-        { file: '01-auth-login.js', name: 'auth-login' },
-        { file: '02-auth-me.js', name: 'auth-me' },
-        { file: '03-auth-features.js', name: 'auth-features' },
-        { file: '04-master-categories.js', name: 'master-categories' }
-      ],
-      quotation: [
-        { file: '01-list-quotations.js', name: 'list-quotations' },
-        { file: '02-get-quotation-detail.js', name: 'get-quotation-detail' },
-        { file: '03-create-quotation.js', name: 'create-quotation' },
-        { file: '04-submit-quotation.js', name: 'submit-quotation' }
-      ]
-    };
-
-    return testFiles[sceneName] || [];
+    return getTestsForScene(sceneName);
   }
 
   getTestFunction(sceneName, testFile) {
-    const testMap = {
-      'homepage/01-auth-login.js': testAuthLogin,
-      'homepage/02-auth-me.js': testAuthMe,
-      'homepage/03-auth-features.js': testAuthFeatures,
-      'homepage/04-master-categories.js': testMasterCategories,
-      'quotation/01-list-quotations.js': testListQuotations,
-      'quotation/02-get-quotation-detail.js': testGetQuotationDetail,
-      'quotation/03-create-quotation.js': testCreateQuotation,
-      'quotation/04-submit-quotation.js': testSubmitQuotationRequest
-    };
-
-    return testMap[`${sceneName}/${testFile}`];
+    return getTestFunction(sceneName, testFile);
   }
 }

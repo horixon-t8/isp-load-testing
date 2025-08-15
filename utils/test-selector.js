@@ -1,26 +1,12 @@
+import { getAvailableScenes, getTestsForScene } from './test-config.js';
+
 export class TestSelector {
   static getAvailableScenes() {
-    // Hardcoded for now, can be made dynamic later
-    return ['homepage', 'quotation'];
+    return getAvailableScenes();
   }
 
   static getTestsForScene(sceneName) {
-    const testFiles = {
-      homepage: [
-        { file: '01-auth-login.js', name: 'auth-login', number: '01' },
-        { file: '02-auth-me.js', name: 'auth-me', number: '02' },
-        { file: '03-auth-features.js', name: 'auth-features', number: '03' },
-        { file: '04-master-categories.js', name: 'master-categories', number: '04' }
-      ],
-      quotation: [
-        { file: '01-list-quotations.js', name: 'list-quotations', number: '01' },
-        { file: '02-get-quotation-detail.js', name: 'get-quotation-detail', number: '02' },
-        { file: '03-create-quotation.js', name: 'create-quotation', number: '03' },
-        { file: '04-submit-quotation.js', name: 'submit-quotation', number: '04' }
-      ]
-    };
-
-    return testFiles[sceneName] || [];
+    return getTestsForScene(sceneName);
   }
 
   static parseTestSelection(selection, availableTests) {
