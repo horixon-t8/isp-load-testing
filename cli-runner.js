@@ -165,9 +165,9 @@ function generateTestSettingDescription(key, setting) {
   const executor = scenario.executor;
   const sleepDuration = setting.sleepDuration || 1;
   const description = setting.description || 'Custom load testing configuration';
-  
+
   let pattern = '';
-  
+
   switch (executor) {
     case 'constant-arrival-rate':
       pattern = `${scenario.rate} req/s, up to ${scenario.maxVUs} VUs, ${sleepDuration}s think`;
@@ -186,23 +186,25 @@ function generateTestSettingDescription(key, setting) {
           const unit = duration.slice(-1);
           return sum + (unit === 'm' ? value * 60 : value);
         }, 0);
-        const durationStr = totalDuration >= 60 ? Math.round(totalDuration / 60) + 'm' : totalDuration + 's';
+        const durationStr =
+          totalDuration >= 60 ? Math.round(totalDuration / 60) + 'm' : totalDuration + 's';
         pattern = `${startVUs}→${maxTarget} VUs over ${durationStr}, ${sleepDuration}s think`;
       }
       break;
     default:
       pattern = `Custom, ${sleepDuration}s think`;
   }
-  
-  const emoji = {
-    'default': '🏃',
-    'constant-vus': '👥', 
-    'ramping-vus': '📈',
-    'light': '💡',
-    'heavy': '💪',
-    'spike': '⚡'
-  }[key] || '⚙️';
-  
+
+  const emoji =
+    {
+      default: '🏃',
+      'constant-vus': '👥',
+      'ramping-vus': '📈',
+      light: '💡',
+      heavy: '💪',
+      spike: '⚡'
+    }[key] || '⚙️';
+
   return {
     name: `${emoji} ${key} - ${description} (${pattern})`,
     value: key,
@@ -289,32 +291,11 @@ async function selectEnvironment() {
   return environment;
 }
 
-async function selectDuration() {
-  clearScreen();
-
-  const { duration } = await inquirer.prompt([
-    {
-      type: 'input',
-      name: 'duration',
-      message: '⏱️  Test duration (e.g., 10s, 30s, 2m, 1h):',
-      default: '10s',
-      validate: value => {
-        if (!/^\d+[smh]$/.test(value)) {
-          return 'Please enter a valid duration (e.g., 10s, 30s, 2m, 1h).';
-        }
-        return true;
-      }
-    }
-  ]);
-
-  return duration;
-}
-
 async function selectTestSetting() {
   clearScreen();
-  
+
   // Generate settings from config
-  const settings = Object.keys(testSettings).map(key => 
+  const settings = Object.keys(testSettings).map(key =>
     generateTestSettingDescription(key, testSettings[key])
   );
 
@@ -363,7 +344,7 @@ async function interactiveMode() {
     console.log('📋 Test Configuration Summary:');
     console.log('==============================');
     console.log(`  Scene: ${scene}`);
-    
+
     // Show test names, not just numbers
     const availableTests = TestSelector.getTestsForScene(scene);
     const selectedTests = TestSelector.parseTestSelection(tests, availableTests);
@@ -375,15 +356,15 @@ async function interactiveMode() {
     } else {
       console.log(`    → ${selectedTests.length} tests selected`);
     }
-    
+
     console.log(`  Environment: ${environment}`);
-    
+
     // Get setting description
     const settingConfig = testSettings[setting];
     const settingDesc = generateTestSettingDescription(setting, settingConfig);
     console.log(`  Setting: ${setting}`);
     console.log(`    → ${settingDesc.name.split(' - ')[1]}`);
-    
+
     console.log(`  Prometheus: ${prometheus ? 'Yes' : 'No'}\n`);
 
     const { confirm } = await inquirer.prompt([

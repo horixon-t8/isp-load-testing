@@ -168,14 +168,14 @@ export PROD_TEST_PASSWORD=your_prod_password
 
 The CLI supports predefined test settings that configure K6's execution patterns with realistic user behavior timing. Use `--setting <name>` or select interactively:
 
-| Setting           | Executor             | Pattern                    | Think Time | Use Case                         |
-| ----------------- | -------------------- | -------------------------- | ---------- | -------------------------------- |
-| **default**       | constant-arrival-rate| 1 req/s, up to 5 VUs      | 1s         | Basic load test with steady rate |
-| **constant-vus**  | constant-vus         | 1 VU throughout            | 2s         | Fixed single user load test      |
-| **ramping-vus**   | ramping-vus          | 1→5→10→0 VUs over 40s     | 1.5s       | Gradual load increase/decrease   |
-| **light**         | constant-arrival-rate| 5 req/s, up to 20 VUs     | 1s         | Moderate load for everyday use   |
-| **heavy**         | ramping-vus          | 10→500 VUs over 20m        | 0.5s       | High stress with fast interactions|
-| **spike**         | ramping-vus          | 10→50→1000→50→0 VUs over 3m | 1s         | Sudden traffic spike simulation  |
+| Setting          | Executor              | Pattern                     | Think Time | Use Case                           |
+| ---------------- | --------------------- | --------------------------- | ---------- | ---------------------------------- |
+| **default**      | constant-arrival-rate | 1 req/s, up to 5 VUs        | 1s         | Basic load test with steady rate   |
+| **constant-vus** | constant-vus          | 1 VU throughout             | 2s         | Fixed single user load test        |
+| **ramping-vus**  | ramping-vus           | 1→5→10→0 VUs over 40s       | 1.5s       | Gradual load increase/decrease     |
+| **light**        | constant-arrival-rate | 5 req/s, up to 20 VUs       | 1s         | Moderate load for everyday use     |
+| **heavy**        | ramping-vus           | 10→500 VUs over 20m         | 0.5s       | High stress with fast interactions |
+| **spike**        | ramping-vus           | 10→50→1000→50→0 VUs over 3m | 1s         | Sudden traffic spike simulation    |
 
 ### Legacy Load Patterns (Deprecated)
 
@@ -312,19 +312,19 @@ Test settings are defined in `config/test-settings.js`. Each setting contains:
 ```javascript
 export default {
   'my-custom-setting': {
-    description: 'Custom moderate load test',  // CLI display description
+    description: 'Custom moderate load test', // CLI display description
     scenarios: {
       my_scenario: {
-        executor: 'constant-vus',        // Executor type
-        vus: 10,                        // Virtual users
-        duration: '2m'                  // Test duration
+        executor: 'constant-vus', // Executor type
+        vus: 10, // Virtual users
+        duration: '2m' // Test duration
       }
     },
     thresholds: {
       http_req_duration: ['p(95)<2000'], // 95% of requests < 2s
-      http_req_failed: ['rate<0.05']     // Error rate < 5%
+      http_req_failed: ['rate<0.05'] // Error rate < 5%
     },
-    sleepDuration: 1.5                   // Think time between requests
+    sleepDuration: 1.5 // Think time between requests
   }
 };
 ```
@@ -361,12 +361,12 @@ spike: {
 
 ### Available K6 Executors
 
-| Executor              | Use Case                     | Key Parameters                    |
-| --------------------- | ---------------------------- | --------------------------------- |
-| `constant-vus`        | Fixed number of VUs          | `vus`, `duration`                 |
-| `constant-arrival-rate` | Fixed request rate         | `rate`, `timeUnit`, `maxVUs`      |
-| `ramping-vus`         | Gradually change VU count    | `startVUs`, `stages[]`            |
-| `ramping-arrival-rate` | Gradually change request rate| `startRate`, `stages[]`          |
+| Executor                | Use Case                      | Key Parameters               |
+| ----------------------- | ----------------------------- | ---------------------------- |
+| `constant-vus`          | Fixed number of VUs           | `vus`, `duration`            |
+| `constant-arrival-rate` | Fixed request rate            | `rate`, `timeUnit`, `maxVUs` |
+| `ramping-vus`           | Gradually change VU count     | `startVUs`, `stages[]`       |
+| `ramping-arrival-rate`  | Gradually change request rate | `startRate`, `stages[]`      |
 
 ### Creating Custom Settings
 
@@ -409,7 +409,7 @@ npm test
 
 ### Setting Guidelines
 
-- **sleepDuration (Think Time)**: 
+- **sleepDuration (Think Time)**:
   - 0.5s: Fast interactions, stress scenarios
   - 1.0s: Normal user browsing behavior
   - 1.5-2s: Deliberate user actions, form filling
@@ -419,14 +419,14 @@ npm test
 
 ### Current Sleep Duration Strategy
 
-| Setting | Think Time | Rationale |
-|---------|------------|----------|
-| default | 1s | Normal browsing pace |
-| constant-vus | 2s | Deliberate single-user testing |
-| ramping-vus | 1.5s | Mixed user behavior patterns |
-| light | 1s | Realistic everyday usage |
-| heavy | 0.5s | Stress testing with fast interactions |
-| spike | 1s | Realistic burst traffic behavior |
+| Setting      | Think Time | Rationale                             |
+| ------------ | ---------- | ------------------------------------- |
+| default      | 1s         | Normal browsing pace                  |
+| constant-vus | 2s         | Deliberate single-user testing        |
+| ramping-vus  | 1.5s       | Mixed user behavior patterns          |
+| light        | 1s         | Realistic everyday usage              |
+| heavy        | 0.5s       | Stress testing with fast interactions |
+| spike        | 1s         | Realistic burst traffic behavior      |
 
 ### Performance Threshold Examples
 
@@ -436,11 +436,11 @@ thresholds: {
   http_req_duration: ['p(95)<2000'],        // 95% under 2s
   http_req_duration: ['p(99)<5000'],        // 99% under 5s
   http_req_duration: ['avg<1000'],          // Average under 1s
-  
+
   // Error rate requirements
   http_req_failed: ['rate<0.05'],           // < 5% errors
   http_req_failed: ['rate<0.01'],           // < 1% errors (strict)
-  
+
   // Custom metric thresholds
   login_duration: ['p(95)<3000'],           // Login-specific timing
   quotation_errors: ['rate<0.02']           // Feature-specific errors
@@ -450,33 +450,36 @@ thresholds: {
 ### Ramping Patterns
 
 #### Load Test Pattern:
+
 ```javascript
 stages: [
-  { duration: '2m', target: 10 },    // Gradual ramp up
-  { duration: '5m', target: 10 },    // Stay at target
-  { duration: '2m', target: 0 }      // Ramp down
-]
+  { duration: '2m', target: 10 }, // Gradual ramp up
+  { duration: '5m', target: 10 }, // Stay at target
+  { duration: '2m', target: 0 } // Ramp down
+];
 ```
 
 #### Stress Test Pattern:
+
 ```javascript
 stages: [
-  { duration: '5m', target: 100 },   // Ramp to normal load
-  { duration: '10m', target: 200 },  // Increase to stress level
-  { duration: '5m', target: 300 },   // Push to breaking point
-  { duration: '10m', target: 200 },  // Back to stress level
-  { duration: '5m', target: 0 }      // Cool down
-]
+  { duration: '5m', target: 100 }, // Ramp to normal load
+  { duration: '10m', target: 200 }, // Increase to stress level
+  { duration: '5m', target: 300 }, // Push to breaking point
+  { duration: '10m', target: 200 }, // Back to stress level
+  { duration: '5m', target: 0 } // Cool down
+];
 ```
 
 #### Spike Test Pattern:
+
 ```javascript
 stages: [
-  { duration: '1m', target: 50 },    // Normal load
+  { duration: '1m', target: 50 }, // Normal load
   { duration: '30s', target: 1000 }, // Sudden spike
-  { duration: '1m', target: 50 },    // Back to normal
-  { duration: '30s', target: 0 }     // End
-]
+  { duration: '1m', target: 50 }, // Back to normal
+  { duration: '30s', target: 0 } // End
+];
 ```
 
 ## 🔧 Development and Maintenance
