@@ -245,6 +245,110 @@ K6_PROMETHEUS_RW_SERVER_URL=http://localhost:18080/prometheus/api/v1/write \
 k6 run main.js --out experimental-prometheus-rw
 ```
 
+### Prometheus Backup and Restore
+
+#### NPM Scripts for Data Management
+
+```bash
+# Export Prometheus data (for analysis/migration)
+npm run data:export
+
+# Import Prometheus data
+npm run data:import
+
+# Create timestamped backup
+npm run data:backup
+
+# Restore from backup
+npm run data:restore
+```
+
+#### Creating Data Backup
+
+```bash
+# Stop the monitoring stack
+npm run grafana:down
+
+# Create timestamped backup of Prometheus data
+npm run data:backup
+# Creates: prometheus/backups/prometheus-YYYYMMDD-HHMMSS.tar.gz
+
+# Restart monitoring stack
+npm run grafana:start
+```
+
+#### Restoring from Backup
+
+```bash
+# Stop the monitoring stack
+npm run grafana:down
+
+# Restore from specific backup file
+npm run data:restore
+# Interactive: Select from available backup files
+
+# Start the monitoring stack
+npm run grafana:start
+```
+
+#### Data Export and Import
+
+**Export Prometheus Data**
+
+```bash
+# Export current metrics to JSON format
+npm run data:export
+# Creates: prometheus/exports/metrics-YYYYMMDD-HHMMSS.json
+```
+
+The export command:
+
+- Extracts all current Prometheus metrics from the database
+- Converts time-series data to portable JSON format
+- Useful for data analysis, migration, or sharing test results
+- Preserves metric names, labels, timestamps, and values
+
+**Import Prometheus Data**
+
+```bash
+# Import previously exported metrics
+npm run data:import
+# Interactive: Select from available export files in prometheus/exports/
+```
+
+The import command:
+
+- Restores metrics from JSON export files
+- Merges imported data with existing metrics (non-destructive)
+- Useful for combining test results from different environments
+- Maintains data integrity and timestamp accuracy
+
+#### Use Cases for Export/Import
+
+| Scenario                  | Command             | Purpose                                  |
+| ------------------------- | ------------------- | ---------------------------------------- |
+| **Data Migration**        | `export` → `import` | Move metrics between environments        |
+| **Test Result Archive**   | `export`            | Save specific test campaign data         |
+| **Performance Analysis**  | `export`            | Extract data for external analysis tools |
+| **Environment Sync**      | `export` → `import` | Share test data across teams             |
+| **Historical Comparison** | `import`            | Compare current vs. previous test runs   |
+
+#### Available Data Scripts
+
+| Script         | Purpose                         | Output Location              |
+| -------------- | ------------------------------- | ---------------------------- |
+| `data:export`  | Export current metrics to JSON  | `prometheus/exports/`        |
+| `data:import`  | Import metrics from JSON export | Restores to Prometheus       |
+| `data:backup`  | Create timestamped archive      | `prometheus/backups/`        |
+| `data:restore` | Restore from backup archive     | Interactive backup selection |
+
+#### Backup Best Practices
+
+- **Regular Schedule**: Run `npm run data:backup` before major test campaigns
+- **Retention Policy**: Keep backups for 30 days, archive monthly snapshots
+- **Validation**: Test restore process periodically with `npm run data:restore`
+- **Storage**: Backup files stored in `prometheus/backups/` directory
+
 ## 📄 Reporting and Output
 
 ### Available Report Types
