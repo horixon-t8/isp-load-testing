@@ -7,7 +7,7 @@ export const TEST_CONFIG = {
   // Test files for each scene
   testFiles: {
     homepage: [
-      { file: '01-auth-login.js', name: 'auth-login', number: '01' },
+      { file: '01-login.js', name: 'login', number: '01' },
       { file: '02-auth-me.js', name: 'auth-me', number: '02' },
       { file: '03-auth-features.js', name: 'auth-features', number: '03' },
       { file: '04-master-categories.js', name: 'master-categories', number: '04' }

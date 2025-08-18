@@ -12,10 +12,8 @@ isp-load-testing/
 │   └── test-credentials.js          # Authentication credential management
 ├── scenes/                          # Test scenarios organized by business domain
 │   ├── homepage/                    # Authentication and landing page tests
-│   │   ├── 01-auth-login.js         # User authentication test
-│   │   ├── 02-auth-me.js            # User profile verification
-│   │   ├── 03-auth-features.js      # Feature access test
-│   │   └── 04-master-categories.js  # Master data loading
+│   │   ├── 01-login.js              # User authentication test
+│   │   ├── 02-homepage.js           # Homepage loading
 │   ├── quotation/                   # Insurance quotation workflow tests
 │   │   ├── 01-list-quotations.js    # List user quotations
 │   │   ├── 02-get-quotation-detail.js # Get specific quotation details
@@ -120,10 +118,10 @@ node cli-runner.js --scene quotation --tests 1-2 --setting heavy
 
 | Test                   | Endpoint                 | Purpose                                   |
 | ---------------------- | ------------------------ | ----------------------------------------- |
-| `01-auth-login`        | `POST /auth/login`       | User authentication with token extraction |
-| `02-auth-me`           | `GET /auth/me`           | Authenticated user profile verification   |
-| `03-auth-features`     | `GET /auth/features`     | User feature access permissions           |
-| `04-master-categories` | `GET /master/categories` | Master data loading for UI                |
+| `01-login`             | `POST /auth/login`       | User authentication with token extraction |
+| `02-homepage`          | `GET /auth/me`           | Authenticated user profile verification   |
+| `02-homepage`          | `GET /auth/features`     | User feature access permissions           |
+| `02-homepage`          | `GET /master/categories` | Master data loading for UI                |
 
 ### Quotation Scene - Insurance Workflows
 
@@ -371,7 +369,7 @@ The import command:
 
 **Example report names:**
 
-- `reports/development_20250814231023_homepage_01-auth-login.html`
+- `reports/development_20250814231023_homepage_01-user-login.html`
 - `reports/development_20250814165437_quotation_01-list-quotations-.csv`
 - `reports/development_20250814103015_homepage_all-tests.html`
 

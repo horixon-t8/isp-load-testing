@@ -5,6 +5,8 @@ import { getTestFunction } from './test-functions.js';
 
 // Global tracking to prevent repetitive logging across k6 iterations
 const globalLoggedTests = new Set();
+// Global flag to ensure login only runs once per session
+let globalLoginAttempted = false;
 
 export class TestRunner {
   constructor(config) {
@@ -24,6 +26,50 @@ export class TestRunner {
       };
     }
     return this.headers;
+  }
+
+  ensureAuthentication(sceneName) {
+    // Skip if already authenticated or login already attempted globally
+    if (this.authToken || globalLoginAttempted) {
+      return;
+    }
+
+    // Try to get and run the login test function
+    const loginFunction = this.getTestFunction(sceneName, '01-login.js');
+    if (loginFunction) {
+      // Only log once per test session
+      if (!globalLoggedTests.has('login-attempt')) {
+        console.log('🔐 Running login first to obtain authentication token...');
+        globalLoggedTests.add('login-attempt');
+      }
+
+      try {
+        const loginResult = loginFunction(this.config.baseUrl);
+        if (loginResult.success && loginResult.accessToken && !loginResult.skipped) {
+          this.authToken = loginResult.accessToken;
+          if (!globalLoggedTests.has('login-success')) {
+            console.log('✅ Authentication successful');
+            globalLoggedTests.add('login-success');
+          }
+        } else if (loginResult.skipped) {
+          if (!globalLoggedTests.has('login-skipped')) {
+            console.log('⚠️  Login skipped - using unauthenticated requests');
+            globalLoggedTests.add('login-skipped');
+          }
+        } else {
+          if (!globalLoggedTests.has('login-failed')) {
+            console.log('❌ Login failed - continuing with unauthenticated requests');
+            globalLoggedTests.add('login-failed');
+          }
+        }
+      } catch (error) {
+        if (!globalLoggedTests.has('login-error')) {
+          console.error(`💥 Login error: ${error.message}`);
+          globalLoggedTests.add('login-error');
+        }
+      }
+      globalLoginAttempted = true;
+    }
   }
 
   runScene(sceneName) {
@@ -54,13 +100,15 @@ export class TestRunner {
     try {
       let result;
       // Handle login test specially to get auth token
-      if (testFile === '01-auth-login.js') {
+      if (testFile === '01-login.js') {
         result = testFunction(this.config.baseUrl);
         if (result.success && result.accessToken && !result.skipped) {
           this.authToken = result.accessToken;
         }
+        globalLoginAttempted = true;
       } else {
-        // For other tests, use authenticated headers if we have a token
+        // For other tests, ensure authentication first, then use authenticated headers
+        this.ensureAuthentication(sceneName);
         const headers = this.getAuthenticatedHeaders();
         result = testFunction(this.config.baseUrl, headers);
       }
@@ -83,7 +131,7 @@ export class TestRunner {
     let overallSuccess = true;
 
     // Run login test first if it exists to get auth token
-    const loginTest = tests.find(test => test.file === '01-auth-login.js');
+    const loginTest = tests.find(test => test.file === '01-login.js');
     if (loginTest) {
       const loginResult = this.runSingleTest(sceneName, loginTest.file);
       results.push({
@@ -95,11 +143,12 @@ export class TestRunner {
       if (!loginResult.success) {
         overallSuccess = false;
       }
+      globalLoginAttempted = true;
     }
 
     // Run remaining tests with potential auth token
     for (const test of tests) {
-      if (test.file === '01-auth-login.js') {
+      if (test.file === '01-login.js') {
         continue;
       } // Already ran above
 

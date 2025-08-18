@@ -479,7 +479,7 @@ async function runTests(options) {
   }
 
   // Check if login test is selected and show credential info
-  const hasLoginTest = selectedTests.some(test => test.file === '01-auth-login.js');
+  const hasLoginTest = selectedTests.some(test => test.file === '01-login.js');
   if (hasLoginTest) {
     console.log('\n💡 Login Test Info:');
     console.log('   To use real credentials, set: TEST_PASSWORD=your_password');

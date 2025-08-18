@@ -12,7 +12,7 @@ let loginSkipMessageShown = false;
 let loginAttempted = false;
 let storedLoginResult = null;
 
-export function testAuthLogin(baseUrl) {
+export function testLogin(baseUrl) {
   // Return cached result if login already attempted
   if (loginAttempted) {
     return storedLoginResult;

@@ -2,35 +2,11 @@ import http from 'k6/http';
 import { check } from 'k6';
 import { Rate, Trend, Counter } from 'k6/metrics';
 
-import { testAuthMe } from '../homepage/02-auth-me.js';
-import { testAuthFeatures } from '../homepage/03-auth-features.js';
-import { testMasterCategories } from '../homepage/04-master-categories.js';
+import { performPrerequisiteChecks } from '../../apis/common-checks.js';
 
 const quotationMyTeamListErrors = new Rate('quotation_myteam_list_errors');
 const quotationMyTeamListResponseTime = new Trend('quotation_myteam_list_response_time');
 const quotationMyTeamListRequests = new Counter('quotation_myteam_list_requests');
-
-function performPrerequisiteChecks(baseUrl, headers, testType) {
-  const authMeResult = testAuthMe(baseUrl, headers);
-  if (!authMeResult.success) {
-    console.error(`Auth me test failed, skipping quotation ${testType} list test`);
-    return false;
-  }
-
-  const authFeaturesResult = testAuthFeatures(baseUrl, headers);
-  if (!authFeaturesResult.success) {
-    console.error(`Auth features test failed, skipping quotation ${testType} list test`);
-    return false;
-  }
-
-  const masterCategoriesResult = testMasterCategories(baseUrl, headers);
-  if (!masterCategoriesResult.success) {
-    console.error(`Master categories test failed, skipping quotation ${testType} list test`);
-    return false;
-  }
-
-  return true;
-}
 
 export function testQuotationMyTeamList(baseUrl, headers) {
   if (!performPrerequisiteChecks(baseUrl, headers, 'myteam')) {
