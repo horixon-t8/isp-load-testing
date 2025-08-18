@@ -2,7 +2,7 @@ import http from 'k6/http';
 import { check } from 'k6';
 import { Rate, Trend, Counter } from 'k6/metrics';
 
-import testCredentials from '../../config/test-credentials.js';
+import testCredentials from '../../../config/test-credentials.js';
 
 const authLoginErrors = new Rate('auth_login_errors');
 const authLoginResponseTime = new Trend('auth_login_response_time');
