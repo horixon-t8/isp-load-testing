@@ -1,6 +1,6 @@
-import { testAuthMe } from './auth-me.js';
-import { testAuthFeatures } from './auth-features.js';
-import { testMasterCategories } from './master-categories.js';
+import { testAuthMe } from './auth/auth-me.js';
+import { testAuthFeatures } from './auth/auth-features.js';
+import { testMasterCategories } from './master/master-categories.js';
 
 export function performPrerequisiteChecks(baseUrl, headers, testType) {
   // Run all 3 APIs sequentially since k6 doesn't support async/await

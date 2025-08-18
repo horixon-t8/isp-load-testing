@@ -9,6 +9,8 @@ import inquirer from 'inquirer';
 import { TestSelector } from './utils/test-selector.js';
 import testSettings from './config/test-settings.js';
 
+const GRAFANA_URL = 'http://localhost:18080/grafana/d/k6-load-testing/k6-load-testing-dashboard';
+
 // Load environment variables from .env file
 config();
 
@@ -140,14 +142,16 @@ function openGrafana(hasSuccessfulTests, enabled) {
   }
 
   if (enabled) {
-    console.log('📊 Opening Grafana to view your reports...');
+    console.log(`🌐 Grafana is available at: ${GRAFANA_URL}`);
+    console.log('Please open the URL manually in your browser.');
 
-    try {
-      execSync('node utils/open-browser.js', { stdio: 'inherit' });
-    } catch (error) {
-      console.log('🌐 Grafana is available at: http://localhost:18080/grafana');
-      console.log('💡 Run "npm run grafana" to start Prometheus+Grafana if it\'s not running');
-    }
+    // console.log('📊 Opening Grafana to view your reports...');
+    // try {
+    //   execSync('node utils/open-browser.js', { stdio: 'inherit' });
+    // } catch (error) {
+    //   console.log('🌐 Grafana is available at: http://localhost:18080/grafana');
+    //   console.log('💡 Run "npm run grafana" to start Prometheus+Grafana if it\'s not running');
+    // }
   }
 }
 
