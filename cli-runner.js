@@ -160,6 +160,70 @@ function clearScreen() {
   console.clear();
 }
 
+function checkDockerServiceHealth(serviceName, healthUrl, timeout = 30000) {
+  console.log(`🔍 Checking ${serviceName} health...`);
+
+  try {
+    // Check if container is running
+    const containerStatus = execSync(`docker-compose ps ${serviceName}`, { encoding: 'utf8' });
+    if (!containerStatus.includes('Up')) {
+      console.log(`⚠️  ${serviceName} container is not running. Starting services...`);
+      execSync('docker-compose up -d', { stdio: 'inherit' });
+      console.log(`✅ Services started. Waiting for ${serviceName} to be ready...`);
+    }
+
+    // Wait for service to be healthy
+    const startTime = Date.now();
+    while (Date.now() - startTime < timeout) {
+      try {
+        execSync(`curl -f ${healthUrl} > /dev/null 2>&1`, { timeout: 5000 });
+        console.log(`✅ ${serviceName} is healthy`);
+        return true;
+      } catch (error) {
+        process.stdout.write('.');
+        execSync('sleep 2');
+      }
+    }
+
+    console.log(`\n❌ ${serviceName} health check timed out after ${timeout / 1000}s`);
+    return false;
+  } catch (error) {
+    console.error(`❌ Error checking ${serviceName} health:`, error.message);
+    return false;
+  }
+}
+
+function checkPrometheusHealth() {
+  return checkDockerServiceHealth('prometheus', 'http://localhost:18080/prometheus/-/healthy');
+}
+
+function checkGrafanaHealth() {
+  return checkDockerServiceHealth('grafana', 'http://localhost:18080/grafana/api/health');
+}
+
+function runServicesHealthCheck() {
+  console.log('\n🏥 Running health checks for monitoring services...');
+  console.log('=================================================');
+
+  const prometheusHealthy = checkPrometheusHealth();
+  const grafanaHealthy = checkGrafanaHealth();
+
+  if (prometheusHealthy && grafanaHealthy) {
+    console.log('\n✅ All monitoring services are healthy and ready!');
+    return true;
+  } else {
+    console.log('\n❌ Some monitoring services are not healthy:');
+    if (!prometheusHealthy) {
+      console.log('  - Prometheus is not responding');
+    }
+    if (!grafanaHealthy) {
+      console.log('  - Grafana is not responding');
+    }
+    console.log('\n💡 Try running: npm run grafana:up');
+    return false;
+  }
+}
+
 function generateTestSettingDescription(key, setting) {
   const scenario = Object.values(setting.scenarios)[0];
   const executor = scenario.executor;
@@ -404,6 +468,16 @@ async function runTests(options) {
   console.log(`📊 Environment: ${options.environment}`);
   console.log(`⚙️  Setting: ${options.setting || 'default'}`);
 
+  // Run health checks for monitoring services if Prometheus is enabled
+  if (options.prometheus) {
+    const servicesHealthy = runServicesHealthCheck();
+    if (!servicesHealthy) {
+      console.log('\n❌ Monitoring services are not healthy. Test execution stopped.');
+      console.log('Run "npm run grafana:up" to start the services and try again.');
+      process.exit(1);
+    }
+  }
+
   // Check if login test is selected and show credential info
   const hasLoginTest = selectedTests.some(test => test.file === '01-auth-login.js');
   if (hasLoginTest) {
@@ -485,6 +559,16 @@ async function main() {
   console.log(`🎯 Running ${selectedTests.length} test(s) for scene: ${options.scene}`);
   console.log(`📊 Environment: ${options.environment}`);
   console.log(`⚙️  Setting: ${options.setting || 'default'}`);
+
+  // Run health checks for monitoring services if Prometheus is enabled
+  if (options.prometheus) {
+    const servicesHealthy = runServicesHealthCheck();
+    if (!servicesHealthy) {
+      console.log('\n❌ Monitoring services are not healthy. Test execution stopped.');
+      console.log('Run "npm run grafana:up" to start the services and try again.');
+      process.exit(1);
+    }
+  }
 
   let successCount = 0;
   const results = [];

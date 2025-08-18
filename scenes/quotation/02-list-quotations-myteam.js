@@ -104,4 +104,3 @@ export function testQuotationMyTeamList(baseUrl, headers) {
 
   return { success, response, duration: response.timings.duration };
 }
-
