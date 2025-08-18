@@ -14,6 +14,8 @@ export class TestRunner {
       Accept: 'application/json'
     };
     this.authToken = null;
+    this.authFailureCount = 0;
+    this.maxAuthFailures = 3;
   }
 
   getAuthenticatedHeaders() {
@@ -26,14 +28,26 @@ export class TestRunner {
     return this.headers;
   }
 
+  handleAuthFailure(sceneName) {
+    console.log('🔄 Handling 401 - clearing auth token and retrying authentication...');
+    this.authToken = null;
+    this.ensureAuthentication(sceneName);
+    return this.getAuthenticatedHeaders();
+  }
+
   ensureAuthentication(sceneName) {
+    // Check if we've exceeded max auth failures
+    if (this.authFailureCount >= this.maxAuthFailures) {
+      throw new Error(`❌ Authentication failed ${this.maxAuthFailures} times. Stopping tests.`);
+    }
+
     // Skip if already authenticated
     if (this.authToken) {
       return;
     }
 
     // Try to get and run the login test function
-    const loginFunction = this.getTestFunction(sceneName, 'login.js');
+    const loginFunction = this.getTestFunction('homepage', 'login.js');
     if (loginFunction) {
       // Only log once per test session
       const vuLogKey = `login-attempt-vu-${__VU}`;
@@ -47,6 +61,7 @@ export class TestRunner {
 
         if (loginResult.success && loginResult.accessToken && !loginResult.skipped) {
           this.authToken = loginResult.accessToken;
+          this.authFailureCount = 0; // Reset failure count on success
           const vuSuccessKey = `login-success-vu-${__VU}`;
           if (!globalLoggedTests.has(vuSuccessKey)) {
             console.log(`✅ VU${__VU}: Authentication successful`);
@@ -58,14 +73,20 @@ export class TestRunner {
             globalLoggedTests.add('login-skipped');
           }
         } else {
+          this.authFailureCount++;
           if (!globalLoggedTests.has('login-failed')) {
-            console.log('❌ Login failed - continuing with unauthenticated requests');
+            console.log(
+              `❌ Login failed (${this.authFailureCount}/${this.maxAuthFailures}) - continuing with unauthenticated requests`
+            );
             globalLoggedTests.add('login-failed');
           }
         }
       } catch (error) {
+        this.authFailureCount++;
         if (!globalLoggedTests.has('login-error')) {
-          console.error(`💥 Login error: ${error.message}`);
+          console.error(
+            `💥 Login error (${this.authFailureCount}/${this.maxAuthFailures}): ${error.message}`
+          );
           globalLoggedTests.add('login-error');
         }
         // Login attempt failed or errored - continue without auth
@@ -110,8 +131,17 @@ export class TestRunner {
       } else {
         // For other tests, ensure authentication first, then use authenticated headers
         this.ensureAuthentication(sceneName);
-        const headers = this.getAuthenticatedHeaders();
+        let headers = this.getAuthenticatedHeaders();
         result = testFunction(this.config.baseUrl, headers);
+
+        // Check for 401 and retry with re-authentication
+        if (result.response && result.response.status === 401 && this.authToken) {
+          console.log(`🔄 Received 401 for ${testFile}, attempting re-authentication...`);
+          headers = this.handleAuthFailure(sceneName);
+          if (this.authToken) {
+            result = testFunction(this.config.baseUrl, headers);
+          }
+        }
       }
 
       // Add sleep after test execution
