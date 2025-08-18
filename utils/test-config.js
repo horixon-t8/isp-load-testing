@@ -11,11 +11,11 @@ export const TEST_CONFIG = {
       { file: 'homepage.js', name: 'homepage' }
     ],
     quotation: [
-      { file: '01-list-quotations-mywork.js', name: 'list-quotations-mywork' },
-      { file: '02-list-quotations-myteam.js', name: 'list-quotations-myteam' },
-      { file: '03-get-quotation-detail.js', name: 'get-quotation-detail' },
-      { file: '04-create-quotation.js', name: 'create-quotation' },
-      { file: '05-submit-quotation.js', name: 'submit-quotation' }
+      { file: 'list-quotations-mywork.js', name: 'list-quotations-mywork' },
+      { file: 'list-quotations-myteam.js', name: 'list-quotations-myteam' },
+      { file: 'get-quotation-detail.js', name: 'get-quotation-detail' },
+      { file: 'create-quotation.js', name: 'create-quotation' },
+      { file: 'submit-quotation.js', name: 'submit-quotation' }
     ]
   }
 };

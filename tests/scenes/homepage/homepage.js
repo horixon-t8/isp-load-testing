@@ -7,7 +7,7 @@ const homepageErrors = new Rate('homepage_errors');
 const homepageResponseTime = new Trend('homepage_response_time');
 const homepageRequests = new Counter('homepage_requests');
 
-export function testHomepage(baseUrl, headers) {
+export function testHomepageScene(baseUrl, headers) {
   const startTime = new Date().getTime();
 
   const overallSuccess = performPrerequisiteChecks(baseUrl, headers, 'homepage');

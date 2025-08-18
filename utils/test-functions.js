@@ -1,23 +1,23 @@
 // Test functions for k6 runtime only
 // This file is imported only by test-runner.js which runs in k6
 
-import { testLogin } from '../tests/scenes/homepage/login.js';
-import { testHomepage } from '../tests/scenes/homepage/homepage.js';
-import { testQuotationMyWorkList } from '../tests/scenes/quotation/01-list-quotations-mywork.js';
-import { testQuotationMyTeamList } from '../tests/scenes/quotation/02-list-quotations-myteam.js';
-import { testGetQuotationDetail } from '../tests/scenes/quotation/03-get-quotation-detail.js';
-import { testCreateQuotation } from '../tests/scenes/quotation/04-create-quotation.js';
-import { testSubmitQuotationRequest } from '../tests/scenes/quotation/05-submit-quotation.js';
+import { testLoginScene } from '../tests/scenes/homepage/login.js';
+import { testHomepageScene } from '../tests/scenes/homepage/homepage.js';
+import { testMyWorkQuotationScene } from '../tests/scenes/quotation/list-quotations-mywork.js';
+import { testMyTeamQuotationScene } from '../tests/scenes/quotation/list-quotations-myteam.js';
+import { testQuotationDetailScene } from '../tests/scenes/quotation/get-quotation-detail.js';
+import { testCreateQuotationScene } from '../tests/scenes/quotation/create-quotation.js';
+import { testSubmitQuotationScene } from '../tests/scenes/quotation/submit-quotation.js';
 
 // Function mappings for each test file (only used in k6 runtime)
 export const TEST_FUNCTIONS = {
-  'homepage/login.js': testLogin,
-  'homepage/homepage.js': testHomepage,
-  'quotation/01-list-quotations-mywork.js': testQuotationMyWorkList,
-  'quotation/02-list-quotations-myteam.js': testQuotationMyTeamList,
-  'quotation/03-get-quotation-detail.js': testGetQuotationDetail,
-  'quotation/04-create-quotation.js': testCreateQuotation,
-  'quotation/05-submit-quotation.js': testSubmitQuotationRequest
+  'homepage/login.js': testLoginScene,
+  'homepage/homepage.js': testHomepageScene,
+  'quotation/list-quotations-mywork.js': testMyWorkQuotationScene,
+  'quotation/list-quotations-myteam.js': testMyTeamQuotationScene,
+  'quotation/get-quotation-detail.js': testQuotationDetailScene,
+  'quotation/create-quotation.js': testCreateQuotationScene,
+  'quotation/submit-quotation.js': testSubmitQuotationScene
 };
 
 export function getTestFunction(sceneName, testFile) {
