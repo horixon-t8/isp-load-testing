@@ -9,6 +9,12 @@ const authMeRequests = new Counter('auth_me_requests');
 export function testAuthMe(baseUrl, headers) {
   const response = http.get(`${baseUrl}/auth/me`, { headers });
 
+  // Debug logging for auth-me failures
+  if (response.status !== 200) {
+    console.error(`❌ Auth-me failed: Status ${response.status}, Body: ${response.body}`);
+    console.error('🔍 Headers sent:', JSON.stringify(headers, null, 2));
+  }
+
   const success = check(response, {
     'auth/me status is 200': r => r.status === 200,
     'auth/me response time < 2s': r => r.timings.duration < 2000,

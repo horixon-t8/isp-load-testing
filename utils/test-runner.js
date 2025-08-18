@@ -5,8 +5,6 @@ import { getTestFunction } from './test-functions.js';
 
 // Global tracking to prevent repetitive logging across k6 iterations
 const globalLoggedTests = new Set();
-// Global flag to ensure login only runs once per session
-let globalLoginAttempted = false;
 
 export class TestRunner {
   constructor(config) {
@@ -29,8 +27,8 @@ export class TestRunner {
   }
 
   ensureAuthentication(sceneName) {
-    // Skip if already authenticated or login already attempted globally
-    if (this.authToken || globalLoginAttempted) {
+    // Skip if already authenticated
+    if (this.authToken) {
       return;
     }
 
@@ -38,18 +36,21 @@ export class TestRunner {
     const loginFunction = this.getTestFunction(sceneName, 'login.js');
     if (loginFunction) {
       // Only log once per test session
-      if (!globalLoggedTests.has('login-attempt')) {
-        console.log('🔐 Running login first to obtain authentication token...');
-        globalLoggedTests.add('login-attempt');
+      const vuLogKey = `login-attempt-vu-${__VU}`;
+      if (!globalLoggedTests.has(vuLogKey)) {
+        console.log(`🔐 VU${__VU}: Running login to obtain authentication token...`);
+        globalLoggedTests.add(vuLogKey);
       }
 
       try {
         const loginResult = loginFunction(this.config.baseUrl);
+
         if (loginResult.success && loginResult.accessToken && !loginResult.skipped) {
           this.authToken = loginResult.accessToken;
-          if (!globalLoggedTests.has('login-success')) {
-            console.log('✅ Authentication successful');
-            globalLoggedTests.add('login-success');
+          const vuSuccessKey = `login-success-vu-${__VU}`;
+          if (!globalLoggedTests.has(vuSuccessKey)) {
+            console.log(`✅ VU${__VU}: Authentication successful`);
+            globalLoggedTests.add(vuSuccessKey);
           }
         } else if (loginResult.skipped) {
           if (!globalLoggedTests.has('login-skipped')) {
@@ -67,8 +68,8 @@ export class TestRunner {
           console.error(`💥 Login error: ${error.message}`);
           globalLoggedTests.add('login-error');
         }
+        // Login attempt failed or errored - continue without auth
       }
-      globalLoginAttempted = true;
     }
   }
 
@@ -102,10 +103,10 @@ export class TestRunner {
       // Handle login test specially to get auth token
       if (testFile === 'login.js') {
         result = testFunction(this.config.baseUrl);
+
         if (result.success && result.accessToken && !result.skipped) {
           this.authToken = result.accessToken;
         }
-        globalLoginAttempted = true;
       } else {
         // For other tests, ensure authentication first, then use authenticated headers
         this.ensureAuthentication(sceneName);
@@ -143,7 +144,8 @@ export class TestRunner {
       if (!loginResult.success) {
         overallSuccess = false;
       }
-      globalLoginAttempted = true;
+
+      // Login completed for this scenario
     }
 
     // Run remaining tests with potential auth token
