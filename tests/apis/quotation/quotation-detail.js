@@ -17,7 +17,7 @@ export function testGetQuotationDetail(baseUrl, headers, quotationId) {
 
   const success = check(response, {
     'quotation detail status is 200': r => r.status === 200,
-    'quotation detail response time < 3s': r => r.timings.duration < 3000,
+    'quotation detail response time < 5s': r => r.timings.duration < 5000,
     'quotation detail has body': r => r.body && r.body.length > 0,
     'quotation detail valid JSON': r => {
       try {

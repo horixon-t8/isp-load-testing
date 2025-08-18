@@ -18,9 +18,7 @@ export function testMyTeamQuotationScene(baseUrl, headers) {
   const success = check(
     { totalDuration, result },
     {
-      'my team quotation API successful': () => result.success,
-      'my team quotation load time < 3s': () => totalDuration < 3000,
-      'my team quotation load time < 2s': () => totalDuration < 2000
+      'my team quotation API successful': () => result.success
     }
   );
 

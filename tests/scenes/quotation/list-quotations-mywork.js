@@ -15,7 +15,6 @@ export function testMyWorkQuotationScene(baseUrl, headers) {
   const endTime = new Date().getTime();
   const totalDuration = endTime - startTime;
 
-  // Only check API success, not arbitrary time limits since API can be slow under load
   const success = check(
     { totalDuration, result },
     {

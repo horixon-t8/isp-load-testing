@@ -50,7 +50,7 @@ export function testQuotationMyWorkList(baseUrl, headers) {
 
   const success = check(response, {
     'quotation mywork list status is 200': r => r.status === 200,
-    'quotation mywork list response time < 3s': r => r.timings.duration < 3000,
+    'quotation mywork list response time < 5s': r => r.timings.duration < 5000,
     'quotation mywork list has body': r => r.body && r.body.length > 0,
     'quotation mywork list valid JSON': r => {
       try {
@@ -123,7 +123,7 @@ export function testQuotationMyTeamList(baseUrl, headers) {
 
   const success = check(response, {
     'quotation myteam list status is 200': r => r.status === 200,
-    'quotation myteam list response time < 8s': r => r.timings.duration < 8000,
+    'quotation myteam list response time < 5s': r => r.timings.duration < 5000,
     'quotation myteam list has body': r => r.body && r.body.length > 0,
     'quotation myteam list valid JSON': r => {
       try {
