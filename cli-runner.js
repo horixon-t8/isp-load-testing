@@ -134,9 +134,12 @@ function runSingleTest(sceneName, testFile, options) {
   }
 }
 
-function openGrafanaAfterSuccess(hasSuccessfulTests, enabled) {
+function openGrafana(hasSuccessfulTests, enabled) {
   if (hasSuccessfulTests && enabled) {
     console.log('\n🎉 Tests completed successfully!');
+  }
+
+  if (enabled) {
     console.log('📊 Opening Grafana to view your reports...');
 
     try {
@@ -301,9 +304,9 @@ async function selectTests(sceneName) {
   const tests = TestSelector.getTestsForScene(sceneName);
 
   const choices = [
-    ...tests.map(test => ({
-      name: `🧪 ${test.number}. ${test.name}`,
-      value: test.number
+    ...tests.map((test, index) => ({
+      name: `🧪 ${index + 1}. ${test.name}`,
+      value: (index + 1).toString()
     })),
     new inquirer.Separator(),
     {
@@ -415,7 +418,8 @@ async function interactiveMode() {
     console.log(`  Tests: ${tests}`);
     if (selectedTests.length <= 5) {
       selectedTests.forEach(test => {
-        console.log(`    → ${test.number}. ${test.name}`);
+        const testIndex = availableTests.indexOf(test) + 1;
+        console.log(`    → ${testIndex}. ${test.name}`);
       });
     } else {
       console.log(`    → ${selectedTests.length} tests selected`);
@@ -479,7 +483,7 @@ async function runTests(options) {
   }
 
   // Check if login test is selected and show credential info
-  const hasLoginTest = selectedTests.some(test => test.file === '01-login.js');
+  const hasLoginTest = selectedTests.some(test => test.file === 'login.js');
   if (hasLoginTest) {
     console.log('\n💡 Login Test Info:');
     console.log('   To use real credentials, set: TEST_PASSWORD=your_password');
@@ -502,7 +506,7 @@ async function runTests(options) {
   console.log(`❌ Failed: ${selectedTests.length - successCount}/${selectedTests.length}`);
 
   // Open Grafana if tests passed and Prometheus was enabled
-  openGrafanaAfterSuccess(successCount > 0, options.prometheus);
+  openGrafana(successCount > 0, options.prometheus);
 }
 
 async function main() {
@@ -586,7 +590,7 @@ async function main() {
   console.log(`❌ Failed: ${selectedTests.length - successCount}/${selectedTests.length}`);
 
   // Open Grafana if tests passed and Prometheus was enabled
-  openGrafanaAfterSuccess(successCount > 0, options.prometheus);
+  openGrafana(successCount > 0, options.prometheus);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

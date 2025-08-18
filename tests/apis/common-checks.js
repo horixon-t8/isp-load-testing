@@ -3,19 +3,25 @@ import { testAuthFeatures } from './auth-features.js';
 import { testMasterCategories } from './master-categories.js';
 
 export function performPrerequisiteChecks(baseUrl, headers, testType) {
-  const authMeResult = testAuthMe(baseUrl, headers);
+  // Run all 3 APIs in parallel
+  const results = Promise.all([
+    Promise.resolve(testAuthMe(baseUrl, headers)),
+    Promise.resolve(testAuthFeatures(baseUrl, headers)),
+    Promise.resolve(testMasterCategories(baseUrl, headers))
+  ]);
+
+  const [authMeResult, authFeaturesResult, masterCategoriesResult] = results;
+
   if (!authMeResult.success) {
     console.error(`Auth me test failed, skipping ${testType} test`);
     return false;
   }
 
-  const authFeaturesResult = testAuthFeatures(baseUrl, headers);
   if (!authFeaturesResult.success) {
     console.error(`Auth features test failed, skipping ${testType} test`);
     return false;
   }
 
-  const masterCategoriesResult = testMasterCategories(baseUrl, headers);
   if (!masterCategoriesResult.success) {
     console.error(`Master categories test failed, skipping ${testType} test`);
     return false;

@@ -12,8 +12,8 @@ isp-load-testing/
 │   └── test-credentials.js          # Authentication credential management
 ├── scenes/                          # Test scenarios organized by business domain
 │   ├── homepage/                    # Authentication and landing page tests
-│   │   ├── 01-login.js              # User authentication test
-│   │   ├── 02-homepage.js           # Homepage loading
+│   │   ├── login.js                 # User authentication test
+│   │   ├── homepage.js              # Homepage loading
 │   ├── quotation/                   # Insurance quotation workflow tests
 │   │   ├── 01-list-quotations.js    # List user quotations
 │   │   ├── 02-get-quotation-detail.js # Get specific quotation details
@@ -116,21 +116,19 @@ node cli-runner.js --scene quotation --tests 1-2 --setting heavy
 
 ### Homepage Scene - Authentication & Landing
 
-| Test                   | Endpoint                 | Purpose                                   |
-| ---------------------- | ------------------------ | ----------------------------------------- |
-| `01-login`             | `POST /auth/login`       | User authentication with token extraction |
-| `02-homepage`          | `GET /auth/me`           | Authenticated user profile verification   |
-| `02-homepage`          | `GET /auth/features`     | User feature access permissions           |
-| `02-homepage`          | `GET /master/categories` | Master data loading for UI                |
+| Test       | Purpose                                   |
+| ---------- | ----------------------------------------- |
+| `login`    | User authentication with token extraction |
+| `homepage` | Authenticated user profile verification   |
 
 ### Quotation Scene - Insurance Workflows
 
-| Test                      | Endpoint                         | Purpose                                 |
-| ------------------------- | -------------------------------- | --------------------------------------- |
-| `01-list-quotations`      | `POST /quotation/requests/list`  | Retrieve user quotations with filtering |
-| `02-get-quotation-detail` | `GET /quotation/detail/{uuid}`   | Get specific quotation details          |
-| `03-create-quotation`     | `POST /quotation/save`           | Create new insurance quotation          |
-| `04-submit-quotation`     | `POST /quotation/submit-request` | Submit quotation for processing         |
+| Test                      | Purpose                                 |
+| ------------------------- | --------------------------------------- |
+| `01-list-quotations`      | Retrieve user quotations with filtering |
+| `02-get-quotation-detail` | Get specific quotation details          |
+| `03-create-quotation`     | Create new insurance quotation          |
+| `04-submit-quotation`     | Submit quotation for processing         |
 
 ## 🌍 Environment Configuration
 

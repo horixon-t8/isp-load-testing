@@ -35,7 +35,7 @@ export class TestRunner {
     }
 
     // Try to get and run the login test function
-    const loginFunction = this.getTestFunction(sceneName, '01-login.js');
+    const loginFunction = this.getTestFunction(sceneName, 'login.js');
     if (loginFunction) {
       // Only log once per test session
       if (!globalLoggedTests.has('login-attempt')) {
@@ -100,7 +100,7 @@ export class TestRunner {
     try {
       let result;
       // Handle login test specially to get auth token
-      if (testFile === '01-login.js') {
+      if (testFile === 'login.js') {
         result = testFunction(this.config.baseUrl);
         if (result.success && result.accessToken && !result.skipped) {
           this.authToken = result.accessToken;
@@ -131,7 +131,7 @@ export class TestRunner {
     let overallSuccess = true;
 
     // Run login test first if it exists to get auth token
-    const loginTest = tests.find(test => test.file === '01-login.js');
+    const loginTest = tests.find(test => test.file === 'login.js');
     if (loginTest) {
       const loginResult = this.runSingleTest(sceneName, loginTest.file);
       results.push({
@@ -148,7 +148,7 @@ export class TestRunner {
 
     // Run remaining tests with potential auth token
     for (const test of tests) {
-      if (test.file === '01-login.js') {
+      if (test.file === 'login.js') {
         continue;
       } // Already ran above
 
