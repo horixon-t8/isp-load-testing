@@ -12,8 +12,12 @@ export default {
       }
     },
     thresholds: {
-      http_req_duration: ['p(95)<2000'],
-      http_req_failed: ['rate<0.05']
+      http_req_duration: [
+        'p(50)<1500', // 50% under 1.5s
+        'p(95)<3000', // 95% under 3s
+        'p(99)<5000' // 99% under 5s
+      ],
+      http_req_failed: ['rate<0.01']
     },
     sleepDuration: 1
   },
@@ -27,8 +31,12 @@ export default {
       }
     },
     thresholds: {
-      http_req_duration: ['p(95)<2000'],
-      http_req_failed: ['rate<0.05']
+      http_req_duration: [
+        'p(50)<1500', // 50% under 1.5s
+        'p(95)<3000', // 95% under 3s
+        'p(99)<5000' // 99% under 5s
+      ],
+      http_req_failed: ['rate<0.01']
     },
     sleepDuration: 2
   },
@@ -46,8 +54,12 @@ export default {
       }
     },
     thresholds: {
-      http_req_duration: ['p(95)<2000'],
-      http_req_failed: ['rate<0.05']
+      http_req_duration: [
+        'p(50)<1500', // 50% under 1.5s
+        'p(95)<3000', // 95% under 3s
+        'p(99)<5000' // 99% under 5s
+      ],
+      http_req_failed: ['rate<0.01']
     },
     sleepDuration: 1.5
   },
@@ -64,8 +76,12 @@ export default {
       }
     },
     thresholds: {
-      http_req_duration: ['p(95)<1500'],
-      http_req_failed: ['rate<0.02']
+      http_req_duration: [
+        'p(50)<1500', // 50% under 1.5s
+        'p(95)<3000', // 95% under 3s
+        'p(99)<5000' // 99% under 5s
+      ],
+      http_req_failed: ['rate<0.01']
     },
     sleepDuration: 1
   },
@@ -84,8 +100,12 @@ export default {
       }
     },
     thresholds: {
-      http_req_duration: ['p(95)<3000'],
-      http_req_failed: ['rate<0.10']
+      http_req_duration: [
+        'p(50)<1500', // 50% under 1.5s
+        'p(95)<3000', // 95% under 3s
+        'p(99)<5000' // 99% under 5s
+      ],
+      http_req_failed: ['rate<0.01']
     },
     sleepDuration: 0.5
   },
@@ -104,8 +124,12 @@ export default {
       }
     },
     thresholds: {
-      http_req_duration: ['p(95)<5000'],
-      http_req_failed: ['rate<0.20']
+      http_req_duration: [
+        'p(50)<1500', // 50% under 1.5s
+        'p(95)<3000', // 95% under 3s
+        'p(99)<5000' // 99% under 5s
+      ],
+      http_req_failed: ['rate<0.01']
     },
     sleepDuration: 1
   }

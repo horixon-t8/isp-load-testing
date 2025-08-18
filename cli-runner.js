@@ -100,8 +100,17 @@ function runSingleTest(sceneName, testFile, options) {
     `TEST_SETTING=${options.setting || 'default'}`,
     // Set Prometheus endpoint for Docker proxy
     options.prometheus
-      ? 'K6_PROMETHEUS_RW_SERVER_URL=http://localhost:18080/prometheus/api/v1/write'
+      ? 'K6_PROMETHEUS_RW_SERVER_URL="http://localhost:18080/prometheus/api/v1/write"'
       : '',
+    options.prometheus
+      ? 'K6_PROMETHEUS_RW_TREND_STATS="count,sum,min,max,avg,med,p(50),p(90),p(95),p(99)"'
+      : '',
+    // options.prometheus
+    //   ? 'K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM="true"'
+    //   : '',
+    // options.prometheus
+    //   ? 'K6_PROMETHEUS_RW_PUSH_INTERVAL="1s"'
+    //   : '',
     // Pass through username environment variables
     process.env.DEV_TEST_USERNAME ? `DEV_TEST_USERNAME=${process.env.DEV_TEST_USERNAME}` : '',
     process.env.STAGING_TEST_USERNAME
@@ -119,8 +128,11 @@ function runSingleTest(sceneName, testFile, options) {
     .join(' ');
 
   try {
-    const outputFlag = options.prometheus ? '--out experimental-prometheus-rw' : '';
-    const command = `${envVars} k6 run ${outputFlag} main.js`;
+    const testId = `${sceneName}-${testFile.replace('.js', '')}`;
+    const outputFlag = options.prometheus
+      ? `--out experimental-prometheus-rw --tag testid=${testId}`
+      : '';
+    const command = `${envVars} k6 run ${outputFlag} main.js `;
     console.log(`📋 Command: ${command}`);
 
     execSync(command, {
@@ -444,7 +456,8 @@ async function interactiveMode() {
         type: 'confirm',
         name: 'confirm',
         message: '▶️  Run tests with this configuration?',
-        default: false
+        default: true
+        // default: false
       }
     ]);
 

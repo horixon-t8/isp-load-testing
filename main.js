@@ -1,8 +1,12 @@
 import { ConfigLoader } from './utils/config-loader.js';
 import { TestRunner } from './utils/test-runner.js';
 import { ReportGenerator } from './utils/report-generator.js';
+import testSettings from './config/test-settings.js';
 
 const config = ConfigLoader.getConfig();
+
+// Global error storage for handleSummary
+global.testErrorLogs = [];
 
 export const options = config.options;
 
@@ -10,6 +14,9 @@ let setupCompleted = false;
 
 export function setup() {
   if (!setupCompleted) {
+    // Store test start time in UTC
+    global.testStartTime = new Date().toISOString();
+
     console.log('🚀 Starting K6 Test Suite');
     console.log(`📊 Environment: ${config.environment}`);
     console.log(`🎯 Base URL: ${config.baseUrl}`);
@@ -48,9 +55,18 @@ export default function (data) {
   try {
     const result = testRunner.runScene(scene);
 
-    // Only log errors, not success messages on every iteration
+    // Only log actual errors, not check failures on every iteration
     if (!result.success) {
-      console.error(`❌ Scene '${scene}' failed`);
+      // Check if this is due to actual errors or just check failures
+      if (result.error) {
+        console.error(`❌ Scene '${scene}' failed: ${result.error}`);
+      } else if (result.errorLogs) {
+        const realErrors = result.errorLogs.filter(log => log.type === 'error');
+        if (realErrors.length > 0) {
+          console.error(`❌ Scene '${scene}' failed with ${realErrors.length} error(s)`);
+        }
+        // Don't log anything for pure check failures to reduce noise
+      }
     }
 
     return result;
@@ -77,29 +93,75 @@ export function handleSummary(data) {
     now.getMinutes().toString().padStart(2, '0') +
     now.getSeconds().toString().padStart(2, '0');
 
-  // Extract scene and test information
+  // Extract scene and test information with timestamps
   const scene = __ENV.SCENE || 'default';
   const testFile = __ENV.TEST_FILE || 'all-tests';
   const testName = testFile.replace('.js', '');
-  const env = __ENV.ENV || 'development';
+  const env = __ENV.ENVIRONMENT || 'development';
+  const testSettingName = __ENV.TEST_SETTING || 'default';
+
+  // Get full test setting configuration
+  const testSettingConfig = testSettings[testSettingName] || testSettings.default;
+
+  // Test timing information
+  const testStartTime = global.testStartTime || new Date().toISOString();
+  const testEndTime = new Date().toISOString();
 
   // Create descriptive report names
   const reportBaseName = `${env}_${timestamp}_${scene}_${testName}`;
 
+  // Enhanced test metadata
+  const testMetadata = {
+    scene,
+    testFile,
+    testName,
+    environment: env,
+    testSettingName,
+    testSettingConfig: {
+      name: testSettingName,
+      description: testSettingConfig.description,
+      scenarios: testSettingConfig.scenarios,
+      thresholds: testSettingConfig.thresholds,
+      sleepDuration: testSettingConfig.sleepDuration
+    },
+    testStartTime,
+    testEndTime,
+    duration: data.state?.testRunDurationMs || 0,
+    timestamp: new Date().toISOString()
+  };
+
+  const enhancedData = {
+    ...data,
+    metadata: testMetadata
+  };
+
   const reports = {
-    'summary.json': JSON.stringify(data, null, 2),
-    stdout: ReportGenerator.generateSummaryReport(data)
+    [`reports/${reportBaseName}.summary.json`]: JSON.stringify(enhancedData, null, 2),
+    stdout: ReportGenerator.generateSummaryReport(data, testMetadata)
   };
 
   // Always generate HTML and CSV reports with descriptive names
   const htmlReportPath = `reports/${reportBaseName}.html`;
   const csvReportPath = `reports/${reportBaseName}.csv`;
+  const errorLogPath = `reports/${reportBaseName}.errors.json`;
 
-  reports[htmlReportPath] = ReportGenerator.generateHTMLReport(data);
-  reports[csvReportPath] = ReportGenerator.generateCSVReport(data);
+  reports[htmlReportPath] = ReportGenerator.generateHTMLReport(data, testMetadata);
+  reports[csvReportPath] = ReportGenerator.generateCSVReport(data, testMetadata);
+
+  // Generate error logs file if there are errors
+  const errorLogs = global.testErrorLogs || [];
+  if (errorLogs && errorLogs.length > 0) {
+    reports[errorLogPath] = JSON.stringify({ errors: errorLogs, ...testMetadata }, null, 2);
+    console.log(`🔴 Error log generated: ${errorLogPath}`);
+  }
 
   console.log(`📄 HTML report generated: ${htmlReportPath}`);
   console.log(`📊 CSV report generated: ${csvReportPath}`);
+  console.log(`⏰ Test started: ${testStartTime}`);
+  console.log(`⏰ Test ended: ${testEndTime}`);
+  console.log(
+    `🎬 Scene: ${scene}, Test: ${testName}, Setting: ${testSettingName} (${testSettingConfig.description})`
+  );
 
   return reports;
 }
