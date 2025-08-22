@@ -94,14 +94,23 @@ export function handleSummary(data) {
     now.getSeconds().toString().padStart(2, '0');
 
   // Extract scene and test information with timestamps
-  const scene = __ENV.SCENE || 'default';
-  const testFile = __ENV.TEST_FILE || 'all-tests';
+  const scene = __ENV.SCENE;
+  const testFile = __ENV.TEST_FILE;
   const testName = testFile.replace('.js', '');
-  const env = __ENV.ENVIRONMENT || 'development';
-  const testSettingName = __ENV.TEST_SETTING || 'default';
+  const env = __ENV.ENVIRONMENT;
+  const testSettingName = __ENV.TEST_SETTING;
+
+  if (!env || !testSettingName) {
+    throw new Error(
+      'Environment and test setting must be specified via __ENV.ENVIRONMENT and __ENV.TEST_SETTING'
+    );
+  }
 
   // Get full test setting configuration
-  const testSettingConfig = testSettings[testSettingName] || testSettings.default;
+  const testSettingConfig = testSettings[testSettingName];
+  if (!testSettingConfig) {
+    throw new Error(`Test setting '${testSettingName}' not found in configuration`);
+  }
 
   // Test timing information
   const testStartTime = global.testStartTime || new Date().toISOString();

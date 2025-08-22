@@ -14,7 +14,24 @@ let cachedQuotationId = null;
 function fetchQuotationIdForTesting(baseUrl, headers) {
   const payload = {
     type: 'MyWork',
-    status: ['Draft', 'QuotationIssued'],
+    status: [
+      'Draft',
+      'SubmitToSSP',
+      'SubmitToUW',
+      'NeedMoreInformation',
+      'DiscountApprovalSubmitted',
+      'DiscountApprovalRejected',
+      'ClosedLost',
+      'Deleted',
+      'Cancelled',
+      'QuotationExpired',
+      'QuotationIssued',
+      'ClosedWon',
+      'PendingPolicyIssue',
+      'PolicyIssued',
+      'NotUsed',
+      'AppFormSubmitted'
+    ],
     createDate: {},
     updateDate: {},
     page: 1,

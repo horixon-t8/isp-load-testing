@@ -1,8 +1,10 @@
 # K6 Test Results and Reports
 summary.json
-reports/*.html
-reports/*.csv
-reports/*.json
+reports/**/*.html
+reports/**/*.csv
+reports/**/*.json
+reports/**/*.md
+reports/**/*.txt
 
 # Node.js
 node_modules/

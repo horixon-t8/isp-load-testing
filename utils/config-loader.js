@@ -19,8 +19,14 @@ export class ConfigLoader {
   }
 
   static getConfig() {
-    const env = __ENV.ENV || 'development';
-    const testSetting = __ENV.TEST_SETTING || 'default';
+    const env = __ENV.ENVIRONMENT;
+    const testSetting = __ENV.TEST_SETTING;
+
+    if (!env || !testSetting) {
+      throw new Error(
+        'Environment and test setting must be specified via __ENV.ENVIRONMENT and __ENV.TEST_SETTING'
+      );
+    }
 
     const envConfig = this.loadEnvironmentConfig(env);
     const testSettings = this.loadTestSettings(testSetting);

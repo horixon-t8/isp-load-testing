@@ -10,7 +10,8 @@ import { TestSelector } from './utils/test-selector.js';
 import testSettings from './config/test-settings.js';
 
 // const GRAFANA_URL = 'http://localhost:18080/grafana/d/k6-load-testing/k6-load-testing-dashboard';
-const GRAFANA_URL = 'http://localhost:18080/grafana/d/ccbb2351-2ae2-462f-ae0e-f2c893ad1028/k6-prometheus';
+const GRAFANA_URL =
+  'http://localhost:18080/grafana/d/ccbb2351-2ae2-462f-ae0e-f2c893ad1028/k6-prometheus';
 
 // Load environment variables from .env file
 config();
@@ -286,7 +287,10 @@ function generateTestSettingDescription(key, setting) {
       'ramping-vus': '📈',
       light: '💡',
       heavy: '💪',
-      spike: '⚡'
+      spike: '⚡',
+      'isp-baseline': '📊',
+      'isp-rampup-200vus': '📈',
+      'isp-rampup-500vus': '💪'
     }[key] || '⚙️';
 
   return {
