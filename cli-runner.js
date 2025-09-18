@@ -8,6 +8,7 @@ import inquirer from 'inquirer';
 
 import { TestSelector } from './utils/test-selector.js';
 import testSettings from './config/test-settings.js';
+import environments from './config/environments.js';
 
 // const GRAFANA_URL = 'http://localhost:18080/grafana/d/k6-load-testing/k6-load-testing-dashboard';
 const GRAFANA_URL =
@@ -118,11 +119,17 @@ function runSingleTest(sceneName, testFile, options) {
     process.env.STAGING_TEST_USERNAME
       ? `STAGING_TEST_USERNAME=${process.env.STAGING_TEST_USERNAME}`
       : '',
+    process.env.PREPROD_TEST_USERNAME
+      ? `PREPROD_TEST_USERNAME=${process.env.PREPROD_TEST_USERNAME}`
+      : '',
     process.env.PROD_TEST_USERNAME ? `PROD_TEST_USERNAME=${process.env.PROD_TEST_USERNAME}` : '',
     // Pass through password environment variables
     process.env.DEV_TEST_PASSWORD ? `DEV_TEST_PASSWORD=${process.env.DEV_TEST_PASSWORD}` : '',
     process.env.STAGING_TEST_PASSWORD
       ? `STAGING_TEST_PASSWORD=${process.env.STAGING_TEST_PASSWORD}`
+      : '',
+    process.env.PREPROD_TEST_PASSWORD
+      ? `PREPROD_TEST_PASSWORD=${process.env.PREPROD_TEST_PASSWORD}`
       : '',
     process.env.PROD_TEST_PASSWORD ? `PROD_TEST_PASSWORD=${process.env.PROD_TEST_PASSWORD}` : ''
   ]
@@ -361,15 +368,15 @@ async function selectTests(sceneName) {
 
 async function selectEnvironment() {
   clearScreen();
-  const environments = ['development', 'staging', 'production'];
+  const envNames = Object.keys(environments);
 
   const { environment } = await inquirer.prompt([
     {
       type: 'list',
       name: 'environment',
       message: '🌍 Select environment:',
-      choices: environments.map(env => ({
-        name: `🌐 ${env}`,
+      choices: envNames.map(env => ({
+        name: `🌐 ${env} (${environments[env].baseUrl})`,
         value: env
       })),
       default: 'development'
@@ -422,9 +429,9 @@ async function interactiveMode() {
   console.log('=====================================\n');
 
   try {
+    const environment = await selectEnvironment();
     const scene = await selectScene();
     const tests = await selectTests(scene);
-    const environment = await selectEnvironment();
     const setting = await selectTestSetting();
     const prometheus = await confirmPrometheus();
 

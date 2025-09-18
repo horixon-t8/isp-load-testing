@@ -138,7 +138,8 @@ node cli-runner.js --scene quotation --tests 1-2 --setting heavy
 | --------------- | ------------------------------------ | ------- | ---------------------- |
 | **Development** | `https://isp-api-dev.horixon-t8.com` | 5s      | Development testing    |
 | **Staging**     | `https://isp-api-uat.horixon-t8.com` | 3s      | Pre-production testing |
-| **Production**  | `https://isp-api.horixon-t8.com`     | 2s      | Production monitoring  |
+| **Pre-Production**  | `https://isp-api-preprod.horixon-t8.com`     | 2s      | Production monitoring  |
+| **Production**  | `http://isp-api.dhipaya.co.th`     | 2s      | Production monitoring  |
 
 ### Authentication Setup
 
@@ -152,6 +153,10 @@ export DEV_TEST_PASSWORD=your_dev_password
 # Staging
 export STAGING_TEST_USERNAME=your_staging_username
 export STAGING_TEST_PASSWORD=your_staging_password
+
+# Pre-Production Environment Test User
+export PREPROD_TEST_USERNAME=your_preprod_username
+export PREPROD_TEST_PASSWORD=your_preprod_password
 
 # Production
 export PROD_TEST_USERNAME=your_prod_username
